@@ -35,10 +35,12 @@ def compile_binaries(sln_dir_abs: str, sln_name: str):
 
     # MSVC's environment variables must be loaded before build process 
     msvc_dir = f"C:\\Program Files\\Microsoft Visual Studio\\"
-    msvc_dir += f"{os.listdir(msvc_dir)[0]}\\Community\\VC\\Auxiliary\\Build"
+    msvc_ver = os.listdir(msvc_dir)
+    msvc_ver.sort()
+    msvc_dir += f"{msvc_ver[-1]}\\Community\\VC\\Auxiliary\\Build"
 
     # Run vcvarsall.bat and capture the environment variables
-    process = subprocess.run(
+    subprocess.run(
         command,
         cwd=R"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build"
     )
@@ -82,21 +84,26 @@ if __name__ == '__main__':
         # MS Windows
         
         # Compile FreeGLUT library from source
-        compile_binaries(
-            sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\dependencies\freeglut\build", 
-            sln_name="freeglut"
-        )
+        if "-build-freeglut" in argv:
+            compile_binaries(
+                sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\dependencies\freeglut\build", 
+                sln_name="freeglut"
+            )
         
-        if not os.path.exists("./build"):
-            os.mkdir("./build")
+        if "-build-proj" in argv:
+            # Compile Solar System Project from source
+            if not os.path.exists("./build"):
+                os.mkdir("./build")
+
+            subprocess.run("cmake ..", cwd="./build")
             
-        subprocess.run("cmake ..", cwd="./build")
-        
-        # Compile Solar System Project from source
-        compile_binaries(
-            sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\build", 
-            sln_name="solar_system"
-        )
+            compile_binaries(
+                sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\build", 
+                sln_name="solar_system"
+            )
+            
+        if "-run" in argv:
+            subprocess.run(R".\build\Release\solar_system.exe")
 
     elif system_platform == "Linux":
         # Linux Distro
