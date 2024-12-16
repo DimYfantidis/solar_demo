@@ -1,35 +1,39 @@
 #define PROJ_DEBUG
 
+#include <time.h>
 #include <stdio.h>
 #include <GL/glut.h>
 
+#include "Camera.h"
 #include "StellarObject.h"
 
 
-int WINDOW_WIDTH = 1000;
-int WINDOW_HEIGHT = 1000;
+int WINDOW_WIDTH = 1920;
+int WINDOW_HEIGHT = 1080;
+
+double framerate = 144.0;
+
+clock_t refresh_ts;
 
 StellarObject* sun;
 StellarObject* earth;
 StellarObject* moon;
 
+Camera* camera;
+
 
 void display(void)
 {
-    float radius = 20.0f;
+    if ((double)(clock() - refresh_ts) / CLOCKS_PER_SEC < 1 / framerate) 
+    {
+        return;
+    }
+    refresh_ts = clock();
 
     printf("Clearing the screen\n");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-radius, radius, -radius, radius, -radius - 40.0, radius + 40.0);
-
-    gluLookAt(
-        16.0, 0.0, 12.0,
-        0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0
-    );
+    updateCamera(camera);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -53,9 +57,15 @@ int main(int argc, char* argv[])
 
     printf("Hello, World?\n");
 
-    sun = colorise3f(
+    camera = initCamera(
+        16.0f, .0f, 12.0f,
+        -16.0f, .0f, -12.0f,
+        .0f, 1.0f, .0f
+    );
+
+    sun = colorise3ub(
         initStellarObject(2.0f, NULL, .0f, .0f, .0f),
-        1.0f, 1.0f, .0f
+        0xFF, 0x4D, 0x00
     );
     earth = colorise3f(
         initStellarObject(.4f, sun, .0f, 3.0f, .0f),

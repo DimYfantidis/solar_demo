@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <GL/freeglut.h>
 
+#include "custom_types.h"
 
-typedef float vector3f[3];
 
 struct StellarObject
 {
