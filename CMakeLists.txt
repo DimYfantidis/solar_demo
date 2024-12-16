@@ -8,7 +8,7 @@ include_directories(
 )
 
 # Specify the library directories
-link_directories(./dependencies/freeglut/lib/x64)
+link_directories(./dependencies/freeglut/build/lib/Release)
 
 # Add source files
 file(GLOB SOURCES "src/*.c")
@@ -22,6 +22,6 @@ target_link_libraries(${PROJECT_NAME} freeglut)
 # Post-build step to copy the DLL
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dependencies/freeglut/bin/x64/freeglut.dll"
+    "${CMAKE_SOURCE_DIR}/dependencies/freeglut/build/bin/Release/freeglut.dll"
     $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
