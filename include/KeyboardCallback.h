@@ -2,6 +2,7 @@
 #define KEYBOARD_CALLBACK_H
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <GL/glut.h>
 
 

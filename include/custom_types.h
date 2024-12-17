@@ -6,6 +6,9 @@
 
 typedef float vector3f[3];
 
+typedef unsigned char byte;
+
+
 float vectorLength3fv(vector3f v)
 {
     return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -27,6 +30,16 @@ char* strBuild(const char* org)
     copy[strLength] = '\0';
 
     return copy;
+}
+
+float AUtoR(float au)
+{
+    return au * 2000;
+}
+
+float AUtoD(float au)
+{
+    return au * 200;
 }
 
 #endif // CUSTOM_TYPES_H

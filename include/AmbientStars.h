@@ -84,7 +84,7 @@ void renderStars(AmbientStars* stars)
             stars->positions[i][1] + stars->POVanchor->position[1],
             stars->positions[i][2] + stars->POVanchor->position[2]
         );
-        gluSphere(stars->quads[i], 1.2, 3, 3);
+        gluSphere(stars->quads[i], 4.5, 3, 3);
         glPopMatrix();
     }
 }

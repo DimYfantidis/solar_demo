@@ -46,7 +46,7 @@ Camera* initCamera(
     camera->upVector[2] = up_z;
 
     camera->movementSpeed = 0.5f;
-    camera->renderDistance = 1000.0f;
+    camera->renderDistance = 5000.0f;
 
     return camera;
 }
@@ -80,7 +80,7 @@ void updateCamera(Camera* camera)
 
     if (shift_key_down) 
     {
-        movementSpeed /= 3;
+        movementSpeed *= 10;
     }
 
     if (keystrokes['W'])

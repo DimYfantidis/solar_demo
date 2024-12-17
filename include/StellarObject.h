@@ -1,15 +1,21 @@
 #ifndef STELLAR_OBJECT_H
 #define STELLAR_OBJECT_H
 
+#include <string.h>
 #include <stdlib.h>
 #include <GL/freeglut.h>
 
 #include "custom_types.h"
+#include "TextRendering.h"
 
 
 struct StellarObject
 {
     float radius;
+    float parametric_angle;
+    float velocity;
+    float parent_dist;
+    char* name;
     GLUquadric* quad;
     vector3f color;
     vector3f position;
@@ -18,31 +24,24 @@ struct StellarObject
 typedef struct StellarObject StellarObject;
 
 
-StellarObject* initStellarObject(float radius, StellarObject* parent, float dx, float dy, float dz) 
+StellarObject* initStellarObject(const char* name, float radius, float vel, StellarObject* parent, float parent_dist) 
 {
 #ifdef PROJ_DEBUG
     printf("Creating StellarObject of radius %.2f\n", radius);
 #endif
     StellarObject* p = (StellarObject*)malloc(sizeof(StellarObject));
 
+    p->name = strBuild(name);
     p->radius = radius;
     p->parent = parent;
     p->quad = gluNewQuadric();
+    p->parametric_angle = (float)(-M_PI);
+    p->velocity = vel;
 
     gluQuadricDrawStyle(p->quad, GLU_FILL);
-
-    if (parent != NULL)
-    {
-        p->position[0] = parent->position[0] + dx;
-        p->position[1] = parent->position[1] + dy;
-        p->position[2] = parent->position[2] + dz;
-    }
-    else 
-    {
-        p->position[0] = dx;
-        p->position[1] = dx;
-        p->position[2] = dx;
-    }
+    
+    p->parent_dist = parent_dist;
+    
 #ifdef PROJ_DEBUG
     printf("StellarObject created at (%.3f, %.3f, %.3f)\n", p->position[0], p->position[1], p->position[2]);
 #endif
@@ -51,37 +50,72 @@ StellarObject* initStellarObject(float radius, StellarObject* parent, float dx, 
     return p;
 }
 
-StellarObject* colorise3f(StellarObject* instance, float red, float green, float blue)
+StellarObject* colorise3f(StellarObject* p, float red, float green, float blue)
 {
-    instance->color[0] = red;
-    instance->color[1] = green;
-    instance->color[2] = blue;
+    p->color[0] = red;
+    p->color[1] = green;
+    p->color[2] = blue;
     
-    return instance;
+    return p;
 }
 
-StellarObject* colorise3ub(StellarObject* instance, unsigned char red, unsigned char green, unsigned char blue)
+StellarObject* colorise3ub(StellarObject* p, byte red, byte green, byte blue)
 {
-    instance->color[0] = red / 255.0f;
-    instance->color[1] = green / 255.0f;
-    instance->color[2] = blue / 255.0f;
+    p->color[0] = red / 255.0f;
+    p->color[1] = green / 255.0f;
+    p->color[2] = blue / 255.0f;
     
-    return instance;
+    return p;
 }
 
 
-void deleteStellarObject(StellarObject* instance)
+void deleteStellarObject(StellarObject* p)
 {
-    gluDeleteQuadric(instance->quad);
-    free(instance);
+    gluDeleteQuadric(p->quad);
+    free(p->name);
+    free(p);
 }
 
-void renderStellarObject(StellarObject* instance)
+void updateStellarObject(StellarObject* p)
 {
-    glColor3fv(instance->color);
+    p->parametric_angle += 2.0f * p->velocity;
+
+    if (p->parametric_angle > M_PI) {
+        p->parametric_angle -= (float)(2 * M_PI);
+    }
+
+    float sin_ang = sinf(p->parametric_angle);
+    float cos_ang = cosf(p->parametric_angle);
+
+    p->position[0] = cos_ang * p->parent_dist;
+    p->position[2] = sin_ang * p->parent_dist;
+}
+
+void renderStellarObject(StellarObject* p)
+{
+    renderStringInWorld(
+
+        p->position[0] + p->parent->position[0], 
+        p->position[1] + p->parent->position[1] + p->radius * 1.1f, 
+        p->position[2] + p->parent->position[2],
+
+        GLUT_BITMAP_9_BY_15, p->name,
+        0xFF, 0xFF, 0xFF
+    );
+
+    glColor3fv(p->color);
     glPushMatrix();
-    glTranslatef(instance->position[0], instance->position[1], instance->position[2]);
-    gluSphere(instance->quad, instance->radius, 64, 32);
+    glTranslatef(
+        p->parent->position[0],
+        p->parent->position[1],
+        p->parent->position[2]
+    );
+    glTranslatef(
+        p->position[0], 
+        p->position[1], 
+        p->position[2]
+    );
+    gluSphere(p->quad, p->radius, 64, 32);
     glPopMatrix();
 }
 
