@@ -55,7 +55,7 @@ def compile_binaries(sln_dir_abs: str, sln_name: str) -> bool:
 
 if __name__ == '__main__':
     
-    if "-clear" in argv or "-cleanse" in argv or "-reset" in argv:
+    if "-clear" in argv or "-cleanse" in argv:
         
         # Clears the project's cache
         if os.path.exists("./dependencies"):
@@ -68,8 +68,7 @@ if __name__ == '__main__':
             shutil.rmtree("./build", onerror=onerror_handler)
 
         # Exit gracefully
-        if not "-reset" in argv:
-            exit()
+        exit()
     
     if not os.path.exists("./dependencies"):
         os.mkdir("./dependencies")
