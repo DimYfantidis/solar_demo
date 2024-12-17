@@ -27,7 +27,7 @@ def onerror_handler(func, path: str, exc_info):
 
 
 def compile_binaries(sln_dir_abs: str, sln_name: str) -> bool:
-    
+
     # Build FreeGLUT from source using the generated solution and MSVC
     command = "cmd.exe /c vcvarsall.bat x64 && "
     command += f"cd {sln_dir_abs} && "
@@ -77,7 +77,8 @@ if __name__ == '__main__':
     if not os.path.exists("./dependencies/freeglut"):
 
         # Download freeglut from its remote repository
-        subprocess.run("git clone https://github.com/freeglut/freeglut.git", cwd="./dependencies", check=True)
+        subprocess.run("git clone --branch v3.6.0 https://github.com/freeglut/freeglut.git", cwd="./dependencies", check=True)
+        subprocess.run("git checkout 96c4b993aab2c1139d940aa6fc9d8955d4e019fa", cwd="./dependencies/freeglut", check=True)
 
         # Create build directory for CMake's output files
         os.mkdir("./dependencies/freeglut/build")

@@ -16,4 +16,17 @@ float clampf(float x, float lo, float hi)
     return (x < lo ? lo : (x > hi ? hi : x));
 }
 
+char* strBuild(const char* org)
+{
+    size_t strLength = strlen(org);
+
+    char* copy  = (char *)malloc((strLength + 1) * sizeof(char));
+
+    strcpy(copy, org);
+
+    copy[strLength] = '\0';
+
+    return copy;
+}
+
 #endif // CUSTOM_TYPES_H

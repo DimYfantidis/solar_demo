@@ -1,5 +1,13 @@
 // #define PROJ_DEBUG
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#   define _CRT_SECURE_NO_WARNINGS
+#endif 
+
+#ifndef _USE_MATH_DEFINES
+#   define _USE_MATH_DEFINES
+#endif 
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,8 +15,10 @@
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h>
 
+#include "Timer.h"
 #include "Camera.h"
 #include "AmbientStars.h"
+#include "MouseCallback.h"
 #include "StellarObject.h"
 #include "KeyboardCallback.h"
 #include "PassiveMotionCallback.h"
@@ -109,7 +119,7 @@ void initGlobals(int argc, char* argv[])
         1.0f, 1.0f, 1.0f
     );
 
-    starsSkyBox = buildStars(400, camera);
+    starsSkyBox = buildStars(500, camera);
 
     callbackPassiveMotion(windowCentreX, windowCentreY);
     callbackPassiveMotion(windowCentreX, windowCentreY);
@@ -135,7 +145,7 @@ int main(int argc, char* argv[])
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	WINDOW_ID = glutCreateWindow("Solar System - exhibition");
 
-    glutFullScreen();
+    // glutFullScreen();
 
 	glClearColor(
         0.0196078431372549f / 4, 
@@ -154,13 +164,15 @@ int main(int argc, char* argv[])
     glutDisplayFunc(display);
     glutKeyboardFunc(callbackKeyboard);
     glutKeyboardUpFunc(callbackKeyboardUp);
+    glutMouseFunc(callbackMouse);
+    glutMotionFunc(callbackPassiveMotion);
     glutPassiveMotionFunc(callbackPassiveMotion);
 
 
     {
-
+        Timer* programTimer = initTimer("glutMainLoop");
 	    glutMainLoop();
-    
+        endTimer(programTimer);
     }
 
 
