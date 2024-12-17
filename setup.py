@@ -60,6 +60,9 @@ if __name__ == '__main__':
         # Clears the project's cache
         if os.path.exists("./dependencies"):
             shutil.rmtree("./dependencies", onerror=onerror_handler)
+        
+        if os.path.exists("./.vscode"):
+            shutil.rmtree("./.vscode", onerror=onerror_handler)
             
         if os.path.exists("./build"):
             shutil.rmtree("./build", onerror=onerror_handler)
