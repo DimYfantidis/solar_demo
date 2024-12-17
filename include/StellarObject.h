@@ -70,7 +70,7 @@ StellarObject* colorise3ub(StellarObject* instance, unsigned char red, unsigned 
 }
 
 
-void destroyStellarObject(StellarObject* instance)
+void deleteStellarObject(StellarObject* instance)
 {
     gluDeleteQuadric(instance->quad);
     free(instance);
@@ -81,7 +81,7 @@ void renderStellarObject(StellarObject* instance)
     glColor3fv(instance->color);
     glPushMatrix();
     glTranslatef(instance->position[0], instance->position[1], instance->position[2]);
-    gluSphere(instance->quad, instance->radius, 32, 16);
+    gluSphere(instance->quad, instance->radius, 64, 32);
     glPopMatrix();
 }
 

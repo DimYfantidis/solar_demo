@@ -26,7 +26,7 @@ def onerror_handler(func, path: str, exc_info):
         raise Exception(exc_info)
 
 
-def compile_binaries(sln_dir_abs: str, sln_name: str):
+def compile_binaries(sln_dir_abs: str, sln_name: str) -> bool:
     
     # Build FreeGLUT from source using the generated solution and MSVC
     command = "cmd.exe /c vcvarsall.bat x64 && "
@@ -40,10 +40,17 @@ def compile_binaries(sln_dir_abs: str, sln_name: str):
     msvc_dir += f"{msvc_ver[-1]}\\Community\\VC\\Auxiliary\\Build"
 
     # Run vcvarsall.bat and capture the environment variables
-    subprocess.run(
-        command,
-        cwd=R"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build"
-    )
+    try:
+        subprocess.run(
+            command,
+            cwd=R"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build", 
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        print(e)
+        return False
+    
+    return True
 
 
 if __name__ == '__main__':
@@ -67,13 +74,13 @@ if __name__ == '__main__':
     if not os.path.exists("./dependencies/freeglut"):
 
         # Download freeglut from its remote repository
-        subprocess.run("git clone https://github.com/freeglut/freeglut.git", cwd="./dependencies")
+        subprocess.run("git clone https://github.com/freeglut/freeglut.git", cwd="./dependencies", check=True)
 
         # Create build directory for CMake's output files
         os.mkdir("./dependencies/freeglut/build")
 
         # Build FreeGLUT from source
-        subprocess.run("cmake ..", cwd="./dependencies/freeglut/build")
+        subprocess.run("cmake ..", cwd="./dependencies/freeglut/build", check=True)
 
     system_platform = pl_system()
 
@@ -85,25 +92,32 @@ if __name__ == '__main__':
         
         # Compile FreeGLUT library from source
         if "-build-freeglut" in argv:
-            compile_binaries(
+            
+            freeglut_success = compile_binaries(
                 sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\dependencies\freeglut\build", 
                 sln_name="freeglut"
             )
+            
+            if not freeglut_success:
+                exit(1)
         
         if "-build-proj" in argv:
             # Compile Solar System Project from source
             if not os.path.exists("./build"):
                 os.mkdir("./build")
 
-            subprocess.run("cmake ..", cwd="./build")
+            subprocess.run("cmake ..", cwd="./build", check=True)
             
-            compile_binaries(
+            proj_success = compile_binaries(
                 sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\build", 
                 sln_name="solar_system"
             )
             
+            if not proj_success:
+                exit(1)
+            
         if "-run" in argv:
-            subprocess.run(R".\build\Release\solar_system.exe")
+            subprocess.run(R".\build\Release\solar_system.exe", check=True)
 
     elif system_platform == "Linux":
         # Linux Distro
