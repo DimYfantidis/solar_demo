@@ -188,7 +188,7 @@ void initGlobals(int argc, char* argv[])
     );
     
     world_centre_placeholder_ignorevar__ = initStellarObject(
-        "", 
+        "[[WORLD_ORIGIN_DUMMY_IGNOREVAR]]", 
         .0f,
         .0f,
         NULL, 
@@ -308,6 +308,7 @@ void deallocateAll(void)
     {
         deleteStellarObject(stellarObjects[i]);
     }
+    deleteStellarObject(world_centre_placeholder_ignorevar__);
 
     deleteCamera(camera);
 
