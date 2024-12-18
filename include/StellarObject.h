@@ -18,8 +18,8 @@ struct StellarObject
     char* name;
     GLUquadric* quad;
     struct StellarObject* parent;
-    vector3f color;
     vector3f position;
+    vector3ub color;
 };
 typedef struct StellarObject StellarObject;
 
@@ -52,18 +52,18 @@ StellarObject* initStellarObject(const char* name, float radius, float vel, Stel
 
 StellarObject* colorise3f(StellarObject* p, float red, float green, float blue)
 {
-    p->color[0] = red;
-    p->color[1] = green;
-    p->color[2] = blue;
+    p->color[0] = (byte)(red * 255);
+    p->color[1] = (byte)(green * 255);
+    p->color[2] = (byte)(blue * 255);
     
     return p;
 }
 
 StellarObject* colorise3ub(StellarObject* p, byte red, byte green, byte blue)
 {
-    p->color[0] = red / 255.0f;
-    p->color[1] = green / 255.0f;
-    p->color[2] = blue / 255.0f;
+    p->color[0] = red;
+    p->color[1] = green;
+    p->color[2] = blue;
     
     return p;
 }

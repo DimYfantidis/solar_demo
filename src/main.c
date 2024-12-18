@@ -58,6 +58,10 @@ void display(void);
 
 int main(int argc, char* argv[])
 {
+    printf("%zu bytes\n", sizeof(StellarObject));
+
+    return 0;
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);

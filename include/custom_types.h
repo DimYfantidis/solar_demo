@@ -4,9 +4,10 @@
 #include <math.h>
 
 
-typedef float vector3f[3];
-
 typedef unsigned char byte;
+
+typedef float vector3f[3];
+typedef byte vector3ub[3];
 
 
 float vectorLength3fv(vector3f v)
