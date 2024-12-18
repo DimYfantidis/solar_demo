@@ -45,7 +45,7 @@ StellarObject* initStellarObject(const char* name, float radius, float vel, Stel
 #ifdef PROJ_DEBUG
     printf("StellarObject created at (%.3f, %.3f, %.3f)\n", p->position[0], p->position[1], p->position[2]);
 #endif
-    p->color[0] = p->color[1] = p->color[2] = .0f;
+    p->color[0] = p->color[1] = p->color[2] = 0x00;
 
     return p;
 }
@@ -103,7 +103,7 @@ void renderStellarObject(StellarObject* p)
         0xFF, 0xFF, 0xFF
     );
 
-    glColor3fv(p->color);
+    glColor3ubv(p->color);
     glPushMatrix();
     glTranslatef(
         p->parent->position[0],
