@@ -50,11 +50,9 @@ StellarObject* initStellarObject(
     gluQuadricDrawStyle(p->quad, GLU_FILL);
     
     p->parent_dist = parent_dist;
-    
-#ifdef PROJ_DEBUG
-    printf("StellarObject created at (%.3f, %.3f, %.3f)\n", p->position[0], p->position[1], p->position[2]);
-#endif
-    p->color[0] = p->color[1] = p->color[2] = 0x00;
+
+    memset(p->position, (int).0f, sizeof(p->position));
+    memset(p->position, (int)0x00, sizeof(p->position));
 
     return p;
 }

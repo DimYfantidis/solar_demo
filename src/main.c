@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	WINDOW_ID = glutCreateWindow("Solar System - exhibition");
 
-    glutFullScreen();
+    // glutFullScreen();
 
 	glClearColor(
         0.0196078431372549f / 4, 
@@ -151,8 +151,8 @@ void initGlobals(int argc, char* argv[])
 {
     srand((unsigned int)time(NULL));
 
-    WINDOW_WIDTH = 2560;
-    WINDOW_HEIGHT = 1440;
+    WINDOW_WIDTH = 1920;
+    WINDOW_HEIGHT = 1080;
 
     windowCentreX = WINDOW_WIDTH / 2;
     windowCentreY = WINDOW_HEIGHT / 2;
