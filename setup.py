@@ -92,19 +92,20 @@ if __name__ == '__main__':
     if system_platform == "Windows":
         
         # MS Windows
-        
-        # Compile FreeGLUT library from source
         if "-build-freeglut" in argv:
             
+            # Compile FreeGLUT library from source
             freeglut_success = compile_binaries(
                 sln_dir_abs=f"{os.getcwd()}\\dependencies\\freeglut\\build", 
                 sln_name="freeglut"
             )
             
             if not freeglut_success:
+                print("Compilation of the FreeGLUT library was unsuccessful.\n")
                 exit(1)
         
         if "-build-proj" in argv:
+            
             # Compile Solar System Project from source
             if not os.path.exists("./build"):
                 os.mkdir("./build")

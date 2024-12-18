@@ -41,14 +41,10 @@ void renderStringInWorld(
     byte r, byte g, byte b
 )
 {
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
-    {
-        glColor3ub(r, g, b);
-        glRasterPos3f(x, y, z);
-        for (int i = 0; string[i] != '\0'; ++i)
-            glutBitmapCharacter(font, string[i]);
-    }
-    glPopAttrib();
+    glColor3ub(r, g, b);
+    glRasterPos3f(x, y, z);
+    for (int i = 0; string[i] != '\0'; ++i)
+        glutBitmapCharacter(font, string[i]);
 }
 
 

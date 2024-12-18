@@ -192,6 +192,7 @@ void initGlobals(int argc, char* argv[])
         .0f,
         .0f,
         NULL, 
+        .0f,
         .0f
     ),
     stellarObjects[0] = sun = colorise3ub(
@@ -200,6 +201,7 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.00465474539672041f), 
             .0f,
             world_centre_placeholder_ignorevar__, 
+            .0f,
             .0f
         ),
         0xFF, 0x4D, 0x00
@@ -210,7 +212,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(4.258750455597227e-05f),
             AUtoR(2.0140660999394828e-07f),
             sun, 
-            AUtoD(1.0f)
+            AUtoD(1.0f),
+            10.0f
         ),
         0x00, 0x00, 0xFF
     );
@@ -220,7 +223,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.0000116312f), 
             AUtoR(0.0000246193f),
             earth, 
-            AUtoD(0.002548f)
+            AUtoD(0.002548f),
+            .0f
         ),
         0xFF, 0xFF, 0xFF
     );
@@ -230,7 +234,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(1.6310392578335008e-05f), 
             AUtoR(3.2687631027892703e-07f),
             sun, 
-            AUtoD(0.38f)
+            AUtoD(0.38f),
+            -30.0f
         ),
         0xFA, 0xFA, 0xFA
     );
@@ -240,7 +245,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(4.045512126396864e-05f), 
             AUtoR(2.327573235973873e-07f),
             sun, 
-            AUtoD(0.73f)
+            AUtoD(0.73f),
+            -10.0f
         ),
         0xFF, 0xE8, 0x93
     );
@@ -250,7 +256,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(2.2660750344490033e-05f), 
             AUtoR(1.5695410563086313e-07f),
             sun, 
-            AUtoD(1.57f)
+            AUtoD(1.57f),
+            20.0f
         ),
         0x8A, 0x33, 0x24
     );
@@ -260,7 +267,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.00046732617030490934f), 
             AUtoR(8.964031330961987e-08f),
             sun, 
-            AUtoD(5.07f)
+            AUtoD(5.07f),
+            40.0f
         ),
         0xF5, 0xEA, 0xB9
     );
@@ -270,7 +278,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.0003892568773039362f), 
             AUtoR(6.377096114644097e-08f),
             sun, 
-            AUtoD(9.64f)
+            AUtoD(9.64f),
+            80.0f
         ),
         0xF5, 0xEA, 0xB9
     );
@@ -280,7 +289,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.00016953449859497235f), 
             AUtoR(4.458619610553054e-08f),
             sun, 
-            AUtoD(19.56f)
+            AUtoD(19.56f),
+            50.0f
         ),
         0xCA, 0xE9, 0xF5
     );
@@ -290,7 +300,8 @@ void initGlobals(int argc, char* argv[])
             AUtoR(0.0001645879041244937f), 
             AUtoR(3.649784568758572e-08f),
             sun, 
-            AUtoD(29.9f)
+            AUtoD(29.9f),
+            -42.0f
         ),
         0x84, 0xAC, 0xFA
     );
