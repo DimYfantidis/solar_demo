@@ -17,9 +17,9 @@ struct StellarObject
     float parent_dist;
     char* name;
     GLUquadric* quad;
+    struct StellarObject* parent;
     vector3f color;
     vector3f position;
-    struct StellarObject* parent;
 };
 typedef struct StellarObject StellarObject;
 
