@@ -97,7 +97,7 @@ if __name__ == '__main__':
         if "-build-freeglut" in argv:
             
             freeglut_success = compile_binaries(
-                sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\dependencies\freeglut\build", 
+                sln_dir_abs=f"{os.getcwd()}\\dependencies\\freeglut\\build", 
                 sln_name="freeglut"
             )
             
@@ -112,7 +112,7 @@ if __name__ == '__main__':
             subprocess.run("cmake ..", cwd="./build", check=True)
             
             proj_success = compile_binaries(
-                sln_dir_abs=R"C:\Users\axaio\Desktop\PROJECTS\my_solar_system\build", 
+                sln_dir_abs=f"{os.getcwd()}\\build", 
                 sln_name="solar_system"
             )
             
