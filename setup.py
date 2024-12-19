@@ -26,7 +26,7 @@ def onerror_handler(func, path: str, exc_info):
         raise Exception(exc_info)
 
 
-def compile_binaries(sln_dir_abs: str, sln_name: str) -> bool:
+def execute_binaries_msvc(sln_dir_abs: str, sln_name: str) -> bool:
 
     # Build FreeGLUT from source using the generated solution and MSVC
     command = "cmd.exe /c vcvarsall.bat x64 && "
@@ -53,6 +53,30 @@ def compile_binaries(sln_dir_abs: str, sln_name: str) -> bool:
     return True
 
 
+def setup_dependency(
+    dep_name: str, 
+    dep_repo_url: str, 
+    version_hex_checkout: str
+) -> bool:
+
+    try:
+        # Download dependency from its remote repository
+        subprocess.run(f"git clone {dep_repo_url}", cwd="./dependencies", check=True)
+        subprocess.run(f"git checkout {version_hex_checkout}", cwd=f"./dependencies/{dep_name}", check=True)
+
+        # Create build directory for CMake's output files
+        os.mkdir(f"./dependencies/{dep_name}/build")
+
+        # Build dependency from source
+        subprocess.run(f"cmake ..", cwd=f"./dependencies/{dep_name}/build", check=True)
+        
+    except subprocess.CalledProcessError as e:
+        print(e)
+        return False
+    
+    return True
+
+
 if __name__ == '__main__':
     
     if "-clear" in argv or "-cleanse" in argv:
@@ -63,7 +87,7 @@ if __name__ == '__main__':
         
         if os.path.exists("./.vscode"):
             shutil.rmtree("./.vscode", onerror=onerror_handler)
-            
+
         if os.path.exists("./build"):
             shutil.rmtree("./build", onerror=onerror_handler)
 
@@ -74,16 +98,27 @@ if __name__ == '__main__':
         os.mkdir("./dependencies")
     
     if not os.path.exists("./dependencies/freeglut"):
+        
+        # Download FreeGLUT from its remote repository
+        if not setup_dependency(
+            "freeglut", 
+            "https://github.com/freeglut/freeglut.git",
+            "96c4b993aab2c1139d940aa6fc9d8955d4e019fa"
+        ):
+            print("Error when cloning FreeGLUT from source repository.")
+            exit(1)
 
-        # Download freeglut from its remote repository
-        subprocess.run("git clone --branch v3.6.0 https://github.com/freeglut/freeglut.git", cwd="./dependencies", check=True)
-        subprocess.run("git checkout 96c4b993aab2c1139d940aa6fc9d8955d4e019fa", cwd="./dependencies/freeglut", check=True)
+    if not os.path.exists("./dependencies/cjson"):
+        
+        # Download cJSON from its remote repository
+        if not setup_dependency(
+            "cjson", 
+            "https://github.com/DaveGamble/cJSON.git",
+            "12c4bf1986c288950a3d06da757109a6aa1ece38"
+        ):
+            print("Error when cloning FreeGLUT from source repository.")
+            exit(1)
 
-        # Create build directory for CMake's output files
-        os.mkdir("./dependencies/freeglut/build")
-
-        # Build FreeGLUT from source
-        subprocess.run("cmake ..", cwd="./dependencies/freeglut/build", check=True)
 
     system_platform = pl_system()
 
@@ -92,36 +127,46 @@ if __name__ == '__main__':
     if system_platform == "Windows":
         
         # MS Windows
-        if "-build-freeglut" in argv:
+        if "-build-depend" in argv:
             
             # Compile FreeGLUT library from source
-            freeglut_success = compile_binaries(
+            if not execute_binaries_msvc(
                 sln_dir_abs=f"{os.getcwd()}\\dependencies\\freeglut\\build", 
                 sln_name="freeglut"
-            )
-            
-            if not freeglut_success:
+            ):
                 print("Compilation of the FreeGLUT library was unsuccessful.\n")
                 exit(1)
-        
-        if "-build-proj" in argv:
             
+            # Compile cJSON library from source
+            if not execute_binaries_msvc(
+                sln_dir_abs=f"{os.getcwd()}\\dependencies\\cjson\\build", 
+                sln_name="cjson"
+            ):
+                print("Compilation of the cJSON library was unsuccessful.\n")
+                exit(1)
+
+
+        if "-build-proj" in argv:
+
             # Compile Solar System Project from source
             if not os.path.exists("./build"):
                 os.mkdir("./build")
 
             subprocess.run("cmake ..", cwd="./build", check=True)
-            
-            proj_success = compile_binaries(
+
+            proj_success = execute_binaries_msvc(
                 sln_dir_abs=f"{os.getcwd()}\\build", 
                 sln_name="solar_system"
             )
-            
+
             if not proj_success:
                 exit(1)
-            
+
         if "-run" in argv:
-            subprocess.run(R".\build\Release\solar_system.exe", check=True)
+            subprocess.run(
+                f".\\build\\Release\\solar_system.exe {os.getcwd()}\\constants.json", 
+                check=True
+            )
 
     elif system_platform == "Linux":
         # Linux Distro

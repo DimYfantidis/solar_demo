@@ -11,6 +11,7 @@ bool shift_key_down = false;
 bool ctrl_key_down = false;
 bool alt_key_down = false;
 
+
 void callbackKeyboard(unsigned char key, int x, int y)
 {
     int modifiers = glutGetModifiers();

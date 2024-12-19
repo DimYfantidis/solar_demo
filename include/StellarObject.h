@@ -45,14 +45,17 @@ StellarObject* initStellarObject(
     p->solar_tilt = solar_tilt;
     p->quad = gluNewQuadric();
     p->parametric_angle = (float)(-M_PI);
+    p->parent_dist = parent_dist;
     p->velocity = vel;
 
-    gluQuadricDrawStyle(p->quad, GLU_FILL);
-    
-    p->parent_dist = parent_dist;
+    if (parent_dist != .0f) {
+        p->velocity /= parent_dist;
+    }
 
     memset(p->position, (int).0f, sizeof(p->position));
     memset(p->position, (int)0x00, sizeof(p->position));
+
+    gluQuadricDrawStyle(p->quad, GLU_FILL);
 
     return p;
 }

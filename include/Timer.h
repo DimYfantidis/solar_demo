@@ -62,7 +62,7 @@ void endTimer(Timer* timer)
 
     // Convert and print the elpased time as milliseconds.
     printf(
-        "Process \"%s\" -> elapsed: (%02zuh : %02zumin : %02zusec : %03zums)\n", 
+        "Process \"%s\" finished after %02zuh : %02zumin : %02zusec : %03zums\n", 
         timer->name, 
         duration_h,
         duration_min,
