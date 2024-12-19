@@ -22,7 +22,8 @@ typedef struct Camera Camera;
 Camera* initCamera(
     float pos_x, float pos_y, float pos_z,
     float ori_x, float ori_y, float ori_z,
-    float up_x, float up_y, float up_z
+    float up_x, float up_y, float up_z,
+    float render_distance
 )
 {
     Camera* camera = (Camera *)malloc(sizeof(Camera));
@@ -46,7 +47,7 @@ Camera* initCamera(
     camera->upVector[2] = up_z;
 
     camera->movementSpeed = 0.5f;
-    camera->renderDistance = 5000.0f;
+    camera->renderDistance = render_distance;
 
     return camera;
 }

@@ -7,6 +7,7 @@
 
 #include "custom_types.h"
 #include "TextRendering.h"
+#include "KeyboardCallback.h"
 
 
 struct StellarObject
@@ -86,9 +87,9 @@ void deleteStellarObject(StellarObject* p)
     free(p);
 }
 
-void updateStellarObject(StellarObject* p)
+void updateStellarObject(StellarObject* p, float speed_factor)
 {
-    p->parametric_angle += 2.0f * p->velocity;
+    p->parametric_angle += speed_factor * p->velocity;
 
     if (p->parametric_angle > M_PI) {
         p->parametric_angle -= (float)(2 * M_PI);
@@ -101,9 +102,68 @@ void updateStellarObject(StellarObject* p)
     p->position[2] = sin_ang * p->parent_dist;
 }
 
-void renderStellarObject(StellarObject* p)
+StellarObject** getStellarObjectAncestors(StellarObject* p, int* n_ancestors)
 {
+    StellarObject* cntr_ptr = p->parent;
+
+    *n_ancestors = 0;
+
+    while (cntr_ptr != NULL)
+    {
+        *n_ancestors += 1;
+        cntr_ptr = cntr_ptr->parent;
+    }
+    if (*n_ancestors == 0) {
+        return NULL;
+    }
+
+    StellarObject** ancestors = (StellarObject **)malloc(*n_ancestors * sizeof(StellarObject *));
+
+    cntr_ptr = p->parent;
+
+    for (int i = 0; i < *n_ancestors; ++i)
+    {
+        ancestors[i] = cntr_ptr;
+        cntr_ptr = cntr_ptr->parent;
+    }
+    return ancestors;
+}
+
+void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject** ancestors, int* n_ancestors)
+{
+    bool uses_cached_ancestors = (ancestors == NULL ? false : true);
+
+    int tmp_n_ancestors;
+
+
     glColor3ubv(p->color);
+    glPushMatrix();
+
+    if (n_ancestors == NULL)
+        n_ancestors = &tmp_n_ancestors;
+
+    if (!uses_cached_ancestors)
+        ancestors = getStellarObjectAncestors(p, n_ancestors);
+
+    // Apply the transformations of all previous astrological systems' anchors. 
+    for (int i = *n_ancestors - 1; i >= 0; --i) 
+    {
+        glRotatef(ancestors[i]->solar_tilt, 0, 0, 1);
+
+        glTranslatef(
+            ancestors[i]->position[0],
+            ancestors[i]->position[1],
+            ancestors[i]->position[2]
+        );
+    }
+
+    if (!uses_cached_ancestors)
+        free(ancestors);
+
+    glRotatef(p->solar_tilt, 0, 0, 1);
+    
+    // The above transformations are saved as they will be 
+    // used for rendering the StellarObject's trajectory as well.
     glPushMatrix();
 
     glTranslatef(
@@ -112,14 +172,6 @@ void renderStellarObject(StellarObject* p)
         p->position[2]
     );
 
-    glRotatef(p->solar_tilt, 0, 0, 1);
-
-    glTranslatef(
-        p->parent->position[0],
-        p->parent->position[1],
-        p->parent->position[2]
-    );
-    
     // Render planet
     gluSphere(p->quad, p->radius, 64, 32);
 
@@ -130,6 +182,21 @@ void renderStellarObject(StellarObject* p)
         0xFF, 0xFF, 0xFF
     );
 
+    glPopMatrix();
+
+    if (render_trajectory)
+    {
+        glColor4f(p->color[0], p->color[1], p->color[2], 0.15f);
+
+        glScalef(p->parent_dist, p->parent_dist, p->parent_dist);
+
+        glBegin(GL_LINE_LOOP);
+        for (float theta = (float)(-M_PI); theta < (float)M_PI; theta += (float)M_PI / 100.0f) 
+        {
+            glVertex3f(cosf(theta), .0f, sinf(theta));
+        }
+        glEnd();
+    }
     glPopMatrix();
 }
 

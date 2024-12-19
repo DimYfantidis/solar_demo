@@ -23,8 +23,8 @@
 #include "MouseCallback.h"
 #include "StellarObject.h"
 #include "KeyboardCallback.h"
+#include "MouseWheelCallback.h"
 #include "PassiveMotionCallback.h"
-
 
 int window_width;
 int window_height;
@@ -32,6 +32,8 @@ int window_id;
 bool fullscreen_enabled;
 
 double framerate;
+
+float simulation_speed;
 
 clock_t refresh_ts;
 
@@ -47,11 +49,16 @@ StellarObject* saturn;
 StellarObject* uranus;
 StellarObject* neptune;
 
-StellarObject* stellarObjects[10];
+#define N_STELLAR_OBJECTS 11
+
+StellarObject* stellarObjects[N_STELLAR_OBJECTS];
+StellarObject** cached_ancestors[N_STELLAR_OBJECTS];
+int n_cached_ancestors[N_STELLAR_OBJECTS];
 
 Camera* camera;
 
 AmbientStars* starsSkyBox;
+
 
 
 void windowControl(void);
@@ -83,6 +90,8 @@ int main(int argc, char* argv[])
         1.0f
     );
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     printf("[1] >>> Hello, Universe!\n");
 
@@ -97,6 +106,7 @@ int main(int argc, char* argv[])
     glutKeyboardUpFunc(callbackKeyboardUp);
     glutMouseFunc(callbackMouse);
     glutMotionFunc(callbackPassiveMotion);
+    glutMouseWheelFunc(callbackMouseWheel);
     glutPassiveMotionFunc(callbackPassiveMotion);
 
 
@@ -142,15 +152,24 @@ void display(void)
 #endif
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    camera->movementSpeed *= moveSpeedScaleFactor;
     updateCamera(camera);
+    moveSpeedScaleFactor = 1.0f;
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    if (keystrokes['+']) {
+        simulation_speed *= 1.05f;
+    }
+    if (keystrokes['-']) {
+        simulation_speed /= 1.05f;
+    }
+
     for (int i = 0; i < sizeof(stellarObjects) / sizeof(stellarObjects[i]); ++i)
     {
-        updateStellarObject(stellarObjects[i]);
-        renderStellarObject(stellarObjects[i]);
+        updateStellarObject(stellarObjects[i], simulation_speed);
+        renderStellarObject(stellarObjects[i], true, cached_ancestors[i], &n_cached_ancestors[i]);
     }
 
     renderStars(starsSkyBox);
@@ -235,6 +254,8 @@ void initGlobals(int argc, char* argv[])
 
     mouseSensitivity = .002f;
 
+    simulation_speed = 1.0f;
+
     for (int i = 0; i < sizeof(keystrokes) / sizeof(keystrokes[0]); ++i) {
         keystrokes[i] = false;
     }
@@ -256,7 +277,8 @@ void initGlobals(int argc, char* argv[])
     camera = initCamera(
         16.47074f, 32.79276f,  5.98598f,
         -0.444f, -0.881f, -0.163f,
-        .0f, 1.0f, .0f
+        .0f, 1.0f, .0f,
+        100000.0f
     );
     
     // ----------- Stellar Objects (BEGIN) ----------- //
@@ -378,17 +400,35 @@ void initGlobals(int argc, char* argv[])
         ),
         0x84, 0xAC, 0xFA
     );
+    stellarObjects[10] = colorise3ub(
+        initStellarObject(
+            "[HObj]", 
+            AUtoR(0.00000116312f), 
+            AUtoR(6.831648039E-8f),
+            moon, 
+            AUtoR(0.00025695553f),
+            -20.0f
+        ),
+        0x00, 0xFF, 0x00
+    );
+
+    for (int i = 0; i < N_STELLAR_OBJECTS; ++i)
+    {
+        cached_ancestors[i] = getStellarObjectAncestors(stellarObjects[i], &n_cached_ancestors[i]);
+        printf("%s -> cached: %d\n", stellarObjects[i]->name, n_cached_ancestors[i]);
+    }
     // ----------- Stellar Objects (END) ----------- //
 
-    starsSkyBox = buildStars(500, camera);
+    starsSkyBox = buildStars(1000, camera);
 }
 
 // Free all dynamically allocated memory and FreeGLUT's resources.
 void deallocateAll(void)
 {
-    for (int i = 0; i < sizeof(stellarObjects) / sizeof(stellarObjects[0]); ++i)
+    for (int i = 0; i < N_STELLAR_OBJECTS; ++i)
     {
         deleteStellarObject(stellarObjects[i]);
+        free(cached_ancestors[i]);
     }
     deleteStellarObject(world_centre_placeholder_ignorevar__);
 

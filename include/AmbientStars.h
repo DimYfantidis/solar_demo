@@ -20,6 +20,7 @@ struct AmbientStars
     int numberOfStars;
     vector3f* positions;
     GLUquadric** quads;
+    float size_in_world;
 };
 typedef struct AmbientStars AmbientStars;
 
@@ -33,6 +34,8 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
     stars->positions = (vector3f*)malloc(numberOfStars * sizeof(vector3f));
 
     stars->POVanchor = POVanchor;
+
+    stars->size_in_world = POVanchor->renderDistance * 0.001f;
 
     stars->quads = (GLUquadric **)malloc(numberOfStars * sizeof(GLUquadric *));
 
@@ -52,12 +55,6 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
         stars->positions[i][0] = cos_vert * sin_horz * (POVanchor->renderDistance * 0.95f);
         stars->positions[i][1] = sin_vert * (POVanchor->renderDistance * 0.95f);
         stars->positions[i][2] = cos_vert * cos_horz * (POVanchor->renderDistance * 0.95f);
-        // printf(
-        //     "ASP%d: (%.3f, %.3f, %.3f)\n", i, 
-        //     stars->positions[i][0], 
-        //     stars->positions[i][1], 
-        //     stars->positions[i][2]
-        // );
     }
 
     return stars;
@@ -84,7 +81,7 @@ void renderStars(AmbientStars* stars)
             stars->positions[i][1] + stars->POVanchor->position[1],
             stars->positions[i][2] + stars->POVanchor->position[2]
         );
-        gluSphere(stars->quads[i], 4.5, 3, 3);
+        gluSphere(stars->quads[i], stars->size_in_world, 3, 3);
         glPopMatrix();
     }
 }
