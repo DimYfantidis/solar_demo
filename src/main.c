@@ -37,23 +37,13 @@ float simulation_speed;
 
 clock_t refresh_ts;
 
-StellarObject* world_centre_placeholder_ignorevar__;
-StellarObject* sun;
-StellarObject* earth;
-StellarObject* moon;
-StellarObject* mercury;
-StellarObject* venus;
-StellarObject* mars;
-StellarObject* jupiter;
-StellarObject* saturn;
-StellarObject* uranus;
-StellarObject* neptune;
 
-#define N_STELLAR_OBJECTS 11
+StellarObject** stellarObjects;
+int numStellarObjects;
 
-StellarObject* stellarObjects[N_STELLAR_OBJECTS];
-StellarObject** cached_ancestors[N_STELLAR_OBJECTS];
-int n_cached_ancestors[N_STELLAR_OBJECTS];
+StellarObject*** cachedAncestors;
+int* numCachedAncestors;
+
 
 Camera* camera;
 
@@ -71,6 +61,11 @@ int main(int argc, char* argv[])
     if (argc < 2)
     {
         fprintf(stderr, "Please specify the JSON file of the dynamically loaded constants.\n");
+        return EXIT_FAILURE;
+    }
+    if (argc < 3)
+    {
+        fprintf(stderr, "Please specify the JSON file of the astronomical system's objects' data.\n");
         return EXIT_FAILURE;
     }
 
@@ -166,10 +161,13 @@ void display(void)
         simulation_speed /= 1.05f;
     }
 
-    for (int i = 0; i < sizeof(stellarObjects) / sizeof(stellarObjects[i]); ++i)
+    for (int i = 0; i < numStellarObjects; ++i)
     {
+        if (stellarObjects[i]->parent == NULL)
+            continue;
+
         updateStellarObject(stellarObjects[i], simulation_speed);
-        renderStellarObject(stellarObjects[i], true, cached_ancestors[i], &n_cached_ancestors[i]);
+        renderStellarObject(stellarObjects[i], true, cachedAncestors[i], &numCachedAncestors[i]);
     }
 
     renderStars(starsSkyBox);
@@ -196,7 +194,7 @@ void initGlobals(int argc, char* argv[])
         fprintf(stderr, "Error: Unable to open the JSON file.\n"); 
         exit(EXIT_FAILURE);
     } 
-  
+
     // read the file contents into a string 
     const size_t JSON_BUFFER_SIZE = 1024 * 1024;
 
@@ -216,6 +214,7 @@ void initGlobals(int argc, char* argv[])
             fprintf(stderr, "Error: %s\n", error_ptr); 
         } 
         cJSON_Delete(json); 
+        free(buffer);
         exit(EXIT_FAILURE); 
     }
 
@@ -282,140 +281,19 @@ void initGlobals(int argc, char* argv[])
     );
     
     // ----------- Stellar Objects (BEGIN) ----------- //
-    world_centre_placeholder_ignorevar__ = initStellarObject(
-        "[[WORLD_ORIGIN_DUMMY_IGNOREVAR]]", 
-        .0f,
-        .0f,
-        NULL, 
-        .0f,
-        .0f
-    ),
-    stellarObjects[0] = sun = colorise3ub(
-        initStellarObject(
-            "The Sun", 
-            AUtoR(0.00465474539672041f), 
-            .0f,
-            world_centre_placeholder_ignorevar__, 
-            .0f,
-            .0f
-        ),
-        0xFF, 0x4D, 0x00
-    );
-    stellarObjects[1] = earth = colorise3ub(
-        initStellarObject(
-            "Earth", 
-            AUtoR(4.258750455597227e-05f),
-            AUtoR(1.990990905E-7f),
-            sun, 
-            AUtoR(1.0f),
-            10.0f
-        ),
-        0x00, 0x00, 0xFF
-    );
-    stellarObjects[2] = moon = colorise3ub(
-        initStellarObject(
-            "Moon", 
-            AUtoR(0.0000116312f), 
-            AUtoR(6.831648039E-9f),
-            earth, 
-            AUtoR(0.0025695553f),
-            .0f
-        ),
-        0xFF, 0xFF, 0xFF
-    );
-    stellarObjects[3] = mercury = colorise3ub(
-        initStellarObject(
-            "Mercury", 
-            AUtoR(1.6310392578335008e-05f), 
-            AUtoR(3.2687631027892703e-07f),
-            sun, 
-            AUtoR(0.38f),
-            -30.0f
-        ),
-        0xFA, 0xFA, 0xFA
-    );
-    stellarObjects[4] = venus = colorise3ub(
-        initStellarObject(
-            "Venus", 
-            AUtoR(4.045512126396864e-05f), 
-            AUtoR(2.327573235973873e-07f),
-            sun, 
-            AUtoR(0.73f),
-            -10.0f
-        ),
-        0xFF, 0xE8, 0x93
-    );
-    stellarObjects[5] = mars = colorise3ub(
-        initStellarObject(
-            "Mars", 
-            AUtoR(2.2660750344490033e-05f), 
-            AUtoR(1.5695410563086313e-07f),
-            sun, 
-            AUtoR(1.57f),
-            20.0f
-        ),
-        0x8A, 0x33, 0x24
-    );
-    stellarObjects[6] = jupiter = colorise3ub(
-        initStellarObject(
-            "Jupiter", 
-            AUtoR(0.00046732617030490934f), 
-            AUtoR(8.964031330961987e-08f),
-            sun, 
-            AUtoR(5.07f),
-            40.0f
-        ),
-        0xF5, 0xEA, 0xB9
-    );
-    stellarObjects[7] = saturn = colorise3ub(
-        initStellarObject(
-            "Saturn", 
-            AUtoR(0.0003892568773039362f), 
-            AUtoR(6.377096114644097e-08f),
-            sun, 
-            AUtoR(9.64f),
-            80.0f
-        ),
-        0xF5, 0xEA, 0xB9
-    );
-    stellarObjects[8] = uranus = colorise3ub(
-        initStellarObject(
-            "Uranus", 
-            AUtoR(0.00016953449859497235f), 
-            AUtoR(4.458619610553054e-08f),
-            sun, 
-            AUtoR(19.56f),
-            50.0f
-        ),
-        0xCA, 0xE9, 0xF5
-    );
-    stellarObjects[9] = neptune = colorise3ub(
-        initStellarObject(
-            "Neptune", 
-            AUtoR(0.0001645879041244937f), 
-            AUtoR(3.649784568758572e-08f),
-            sun, 
-            AUtoR(29.9f),
-            -42.0f
-        ),
-        0x84, 0xAC, 0xFA
-    );
-    stellarObjects[10] = colorise3ub(
-        initStellarObject(
-            "[HObj]", 
-            AUtoR(0.00000116312f), 
-            AUtoR(6.831648039E-8f),
-            moon, 
-            AUtoR(0.00025695553f),
-            -20.0f
-        ),
-        0x00, 0xFF, 0x00
-    );
 
-    for (int i = 0; i < N_STELLAR_OBJECTS; ++i)
+    stellarObjects = loadAllStellarObjects(&numStellarObjects, argv[2]);
+
+    if (stellarObjects == NULL)
+        exit(EXIT_FAILURE);
+
+    cachedAncestors = (StellarObject ***)malloc(numStellarObjects * sizeof(StellarObject **));
+    numCachedAncestors = (int *)malloc(numStellarObjects * sizeof(int));
+
+    for (int i = 0; i < numStellarObjects; ++i)
     {
-        cached_ancestors[i] = getStellarObjectAncestors(stellarObjects[i], &n_cached_ancestors[i]);
-        printf("%s -> cached: %d\n", stellarObjects[i]->name, n_cached_ancestors[i]);
+        cachedAncestors[i] = getStellarObjectAncestors(stellarObjects[i], &numCachedAncestors[i]);
+        // printf("%s -> cached: %d\n", stellarObjects[i]->name, numCachedAncestors[i]);
     }
     // ----------- Stellar Objects (END) ----------- //
 
@@ -425,12 +303,17 @@ void initGlobals(int argc, char* argv[])
 // Free all dynamically allocated memory and FreeGLUT's resources.
 void deallocateAll(void)
 {
-    for (int i = 0; i < N_STELLAR_OBJECTS; ++i)
+    for (int i = 0; i < numStellarObjects; ++i)
     {
         deleteStellarObject(stellarObjects[i]);
-        free(cached_ancestors[i]);
+        
+        if (cachedAncestors[i] != NULL)
+            free(cachedAncestors[i]);
     }
-    deleteStellarObject(world_centre_placeholder_ignorevar__);
+    
+    free(stellarObjects);
+    free(cachedAncestors);
+    free(numCachedAncestors);
 
     deleteCamera(camera);
 

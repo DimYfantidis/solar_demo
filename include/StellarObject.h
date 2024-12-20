@@ -1,6 +1,7 @@
 #ifndef STELLAR_OBJECT_H
 #define STELLAR_OBJECT_H
 
+#include <cJSON.h>
 #include <string.h>
 #include <stdlib.h>
 #include <GL/freeglut.h>
@@ -29,7 +30,7 @@ typedef struct StellarObject StellarObject;
 StellarObject* initStellarObject(
     const char* name, 
     float radius, 
-    float vel, 
+    float lin_velocity, 
     StellarObject* parent, 
     float parent_dist,
     float solar_tilt
@@ -41,13 +42,13 @@ StellarObject* initStellarObject(
     StellarObject* p = (StellarObject*)malloc(sizeof(StellarObject));
 
     p->name = strBuild(name);
-    p->radius = radius;
+    p->radius = AUtoR(radius);
     p->parent = parent;
     p->solar_tilt = solar_tilt;
     p->quad = gluNewQuadric();
     p->parametric_angle = (float)(-M_PI);
-    p->parent_dist = parent_dist;
-    p->velocity = vel;
+    p->parent_dist = AUtoR(parent_dist);
+    p->velocity = AUtoR(lin_velocity);
 
     if (parent_dist != .0f) {
         p->velocity /= parent_dist;
@@ -75,16 +76,19 @@ StellarObject* colorise3ub(StellarObject* p, ubyte red, ubyte green, ubyte blue)
     p->color[0] = red;
     p->color[1] = green;
     p->color[2] = blue;
-    
+
     return p;
 }
 
 
 void deleteStellarObject(StellarObject* p)
 {
-    gluDeleteQuadric(p->quad);
-    free(p->name);
-    free(p);
+    if (p != NULL)
+    {
+        gluDeleteQuadric(p->quad);
+        free(p->name);
+        free(p);
+    }
 }
 
 void updateStellarObject(StellarObject* p, float speed_factor)
@@ -198,6 +202,146 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
         glEnd();
     }
     glPopMatrix();
+}
+
+StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename)
+{
+    int mem_capacity = 20;
+
+    StellarObject** dest_array = (StellarObject **)malloc(mem_capacity * sizeof(StellarObject *));
+
+    *array_size = 0;
+
+    // open the JSON file 
+    FILE *fp = fopen(json_filename, "r"); 
+    
+    if (fp == NULL) 
+    { 
+        fprintf(stderr, "Error: Unable to open the JSON file \"%s\".\n", json_filename); 
+        return NULL;
+    } 
+
+    // read the file contents into a string 
+    const size_t JSON_BUFFER_SIZE = 1024 * 1024;
+
+    char* buffer = (char *)malloc(JSON_BUFFER_SIZE * sizeof(char));
+
+    size_t len = fread(buffer, 1, JSON_BUFFER_SIZE, fp);
+
+    fclose(fp); 
+
+    // parse the JSON data 
+    cJSON *json = cJSON_Parse(buffer); 
+
+    if (json == NULL) 
+    { 
+        const char *error_ptr = cJSON_GetErrorPtr(); 
+        if (error_ptr != NULL) { 
+            fprintf(stderr, "Error: %s\n", error_ptr); 
+        }
+        cJSON_Delete(json);
+        free(buffer);
+        return 2; 
+    }
+
+    const cJSON *iterator = NULL;
+    const cJSON *allStellarObjects = NULL;
+
+    allStellarObjects = cJSON_GetObjectItemCaseSensitive(json, "Astronomical Objects");
+    cJSON_ArrayForEach(iterator, allStellarObjects)
+    {
+        static const char* err_message = "StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
+
+        cJSON *name = cJSON_GetObjectItemCaseSensitive(iterator, "name");
+        cJSON *radius = cJSON_GetObjectItemCaseSensitive(iterator, "radius");
+        cJSON *lin_velocity = cJSON_GetObjectItemCaseSensitive(iterator, "lin_velocity");
+        cJSON *parent = cJSON_GetObjectItemCaseSensitive(iterator, "parent");
+        cJSON *parent_dist = cJSON_GetObjectItemCaseSensitive(iterator, "parent_dist");
+        cJSON *solar_tilt = cJSON_GetObjectItemCaseSensitive(iterator, "solar_tilt");
+        cJSON *color = cJSON_GetObjectItemCaseSensitive(iterator, "color");
+
+
+        if (!cJSON_IsString(name) || name->valuestring == NULL)
+        {
+            fprintf(stderr, err_message, "name", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsNumber(radius))
+        {
+            fprintf(stderr, err_message, "radius", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsNumber(lin_velocity))
+        {
+            fprintf(stderr, err_message, "lin_velocity", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsString(parent) && !cJSON_IsNull(parent))
+        {
+            fprintf(stderr, err_message, "parent", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsNumber(parent_dist))
+        {
+            fprintf(stderr, err_message, "parent_dist", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsNumber(solar_tilt))
+        {
+            fprintf(stderr, err_message, "solar_tilt", json_filename);
+            return NULL;
+        }
+        if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
+        {
+            fprintf(stderr, err_message, "color", json_filename);
+            return NULL;
+        }
+
+        StellarObject* parent_raw = NULL;
+
+        if (!cJSON_IsNull(parent))
+        {
+            for (int i = 0; i < *array_size; ++i)
+            {
+                if (strcmp(parent->valuestring, dest_array[i]->name) != 0)
+                    continue;
+                
+                parent_raw = dest_array[i];
+                break;
+            }
+        }
+        
+        cJSON* r = cJSON_GetArrayItem(color, 0);
+        cJSON* g = cJSON_GetArrayItem(color, 1);
+        cJSON* b = cJSON_GetArrayItem(color, 2);
+
+        dest_array[*array_size] = colorise3ub(
+                initStellarObject(
+                    name->valuestring,
+                    (float)radius->valuedouble,
+                    (float)lin_velocity->valuedouble,
+                    parent_raw,
+                    (float)parent_dist->valuedouble,
+                    (float)solar_tilt->valuedouble
+            ),
+            (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint
+        );
+
+        *array_size += 1;
+
+        if (*array_size == mem_capacity)
+        {
+            mem_capacity += 20;
+            dest_array = (StellarObject **)realloc(dest_array, mem_capacity * sizeof(StellarObject *));
+        }
+    }
+
+    cJSON_Delete(json);
+    free(buffer);
+
+    dest_array = (StellarObject **)realloc(dest_array, (*array_size) * sizeof(StellarObject *));
+
+    return dest_array;
 }
 
 #endif // STELLAR_OBJECT_H

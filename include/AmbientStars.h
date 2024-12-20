@@ -60,8 +60,11 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
     return stars;
 }
 
-inline void deleteStars(AmbientStars* stars)
+void deleteStars(AmbientStars* stars)
 {
+    if (stars == NULL)
+        return;
+
     for (int i = 0; i < stars->numberOfStars; ++i)
     {
         gluDeleteQuadric(stars->quads[i]);

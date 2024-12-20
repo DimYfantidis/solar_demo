@@ -145,7 +145,6 @@ if __name__ == '__main__':
                 print("Compilation of the cJSON library was unsuccessful.\n")
                 exit(1)
 
-
         if "-build-proj" in argv:
 
             # Compile Solar System Project from source
@@ -154,17 +153,20 @@ if __name__ == '__main__':
 
             subprocess.run("cmake ..", cwd="./build", check=True)
 
-            proj_success = execute_binaries_msvc(
+            if not execute_binaries_msvc(
                 sln_dir_abs=f"{os.getcwd()}\\build", 
                 sln_name="solar_system"
-            )
-
-            if not proj_success:
+            ):
                 exit(1)
 
         if "-run" in argv:
+            
+            constants = f"{os.getcwd()}\\data\\constants.json"
+            astro_system_json = [x for x in argv if x.startswith("/planets:")]
+            astro_system_json = f"{os.getcwd()}\\data\\{astro_system_json[0].removeprefix('/planets:')}.json"
+            
             subprocess.run(
-                f".\\build\\Release\\solar_system.exe {os.getcwd()}\\constants.json", 
+                f".\\build\\Release\\solar_system.exe {constants} {astro_system_json}", 
                 check=True
             )
 

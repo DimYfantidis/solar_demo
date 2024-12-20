@@ -132,7 +132,8 @@ void updateCamera(Camera* camera)
 
 inline void deleteCamera(Camera* camera)
 {
-    free(camera);
+    if (camera != NULL)
+        free(camera);
 }
 
 #endif // CAMERA_H
