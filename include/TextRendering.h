@@ -16,22 +16,18 @@ void renderStringOnScreen(
     byte r, byte g, byte b
 )
 {
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
     {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        {
-            glLoadMatrixf(windowMatrix);
-            //glDisable(GL_LIGHTING);
-            glColor3ub(r, g, b);
-            glRasterPos2f(x, y);
+        glLoadMatrixf(windowMatrix);
+        //glDisable(GL_LIGHTING);
+        glColor3ub(r, g, b);
+        glRasterPos2f(x, y);
 
-            glutBitmapString(font, (const unsigned char*)string);
-            //glEnable(GL_LIGHTING);
-        }
-        glPopMatrix();
+        glutBitmapString(font, (const unsigned char*)string);
+        //glEnable(GL_LIGHTING);
     }
-	glPopAttrib();
+    glPopMatrix();
 }
 
 

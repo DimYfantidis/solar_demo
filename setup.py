@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
         if "-run" in argv:
             
-            constants = f"{os.getcwd()}\\data\\constants.json"
+            constants = f"{os.getcwd()}\\data\\_constants.json"
             astro_system_json = [x for x in argv if x.startswith("/planets:")]
             astro_system_json = f"{os.getcwd()}\\data\\{astro_system_json[0].removeprefix('/planets:')}.json"
             

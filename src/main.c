@@ -18,6 +18,7 @@
 
 #include "Timer.h"
 #include "Camera.h"
+#include "MenuScreen.h"
 #include "AmbientStars.h"
 #include "TextRendering.h"
 #include "MouseCallback.h"
@@ -25,6 +26,7 @@
 #include "KeyboardCallback.h"
 #include "MouseWheelCallback.h"
 #include "PassiveMotionCallback.h"
+
 
 int window_width;
 int window_height;
@@ -49,6 +51,8 @@ Camera* camera;
 
 AmbientStars* starsSkyBox;
 
+MenuScreen* mainMenuScreen;
+MenuScreen* planetMenuScreen;
 
 
 void windowControl(void);
@@ -141,7 +145,7 @@ void display(void)
         return;
     }
     refresh_ts = clock();
-    
+
 #ifdef PROJ_DEBUG
     printf("Clearing the screen (elapsed: %.3f sec)\n", elapsed_seconds);
 #endif
@@ -151,6 +155,8 @@ void display(void)
     updateCamera(camera);
     moveSpeedScaleFactor = 1.0f;
 
+    renderMenuScreen(planetMenuScreen);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -279,7 +285,7 @@ void initGlobals(int argc, char* argv[])
         .0f, 1.0f, .0f,
         100000.0f
     );
-    
+
     // ----------- Stellar Objects (BEGIN) ----------- //
 
     stellarObjects = loadAllStellarObjects(&numStellarObjects, argv[2]);
@@ -296,6 +302,23 @@ void initGlobals(int argc, char* argv[])
         // printf("%s -> cached: %d\n", stellarObjects[i]->name, numCachedAncestors[i]);
     }
     // ----------- Stellar Objects (END) ----------- //
+
+
+    mainMenuScreen = initMenuScreen(
+        4,
+        "Goofy",
+        "Goofy 2",
+        "kati tetoia",
+        "Exit"
+    );
+    setMenuScreenBoxDimensions(mainMenuScreen, 0.12f, 0.04f);
+
+    planetMenuScreen = initMenuScreenEmpty(numStellarObjects);
+
+    for (int i = 0; i < numStellarObjects; ++i) {
+        assignMenuScreenElement(planetMenuScreen, i, stellarObjects[i]->name);
+    }
+    setMenuScreenBoxDimensions(planetMenuScreen, 0.07f, 0.03f);
 
     starsSkyBox = buildStars(1000, camera);
 }
@@ -318,6 +341,9 @@ void deallocateAll(void)
     deleteCamera(camera);
 
     deleteStars(starsSkyBox);
+
+    deleteMenuScreen(mainMenuScreen);
+    deleteMenuScreen(planetMenuScreen);
 
     glutExit();
 }

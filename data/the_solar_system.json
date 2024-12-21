@@ -109,6 +109,16 @@
             "parent_dist" : 29.9,
             "solar_tilt" : -42.0,
             "color" : [132, 172, 250]
+        },
+
+        {
+            "name" : "[HObj]", 
+            "radius" : 0.00000116312, 
+            "lin_velocity" : 6.831648039E-9,
+            "parent" : "Moon", 
+            "parent_dist" : 0.00025695553,
+            "solar_tilt" : 70.0,
+            "color" : [0, 255, 0]
         }
     ]
 }

@@ -35,7 +35,7 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
 
     stars->POVanchor = POVanchor;
 
-    stars->size_in_world = POVanchor->renderDistance * 0.001f;
+    stars->size_in_world = POVanchor->renderDistance * 0.0007f;
 
     stars->quads = (GLUquadric **)malloc(numberOfStars * sizeof(GLUquadric *));
 
@@ -52,9 +52,9 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
         float cos_vert = cosf(u);
         float cos_horz = cosf(v);
 
-        stars->positions[i][0] = cos_vert * sin_horz * (POVanchor->renderDistance * 0.95f);
-        stars->positions[i][1] = sin_vert * (POVanchor->renderDistance * 0.95f);
-        stars->positions[i][2] = cos_vert * cos_horz * (POVanchor->renderDistance * 0.95f);
+        stars->positions[i][0] = cos_vert * sin_horz * (POVanchor->renderDistance * 0.92f);
+        stars->positions[i][1] = sin_vert * (POVanchor->renderDistance * 0.92f);
+        stars->positions[i][2] = cos_vert * cos_horz * (POVanchor->renderDistance * 0.92f);
     }
 
     return stars;

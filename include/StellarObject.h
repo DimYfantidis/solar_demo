@@ -165,7 +165,7 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
         free(ancestors);
 
     glRotatef(p->solar_tilt, 0, 0, 1);
-    
+
     // The above transformations are saved as they will be 
     // used for rendering the StellarObject's trajectory as well.
     glPushMatrix();
@@ -206,15 +206,13 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
 
 StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename)
 {
-    int mem_capacity = 20;
-
-    StellarObject** dest_array = (StellarObject **)malloc(mem_capacity * sizeof(StellarObject *));
+    StellarObject** dest_array;
 
     *array_size = 0;
 
     // open the JSON file 
     FILE *fp = fopen(json_filename, "r"); 
-    
+
     if (fp == NULL) 
     { 
         fprintf(stderr, "Error: Unable to open the JSON file \"%s\".\n", json_filename); 
@@ -241,16 +239,47 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
         }
         cJSON_Delete(json);
         free(buffer);
-        return 2; 
+        return NULL; 
     }
 
     const cJSON *iterator = NULL;
     const cJSON *allStellarObjects = NULL;
 
     allStellarObjects = cJSON_GetObjectItemCaseSensitive(json, "Astronomical Objects");
+
+    if (!cJSON_IsArray(allStellarObjects))
+    {
+        fprintf(
+            stderr, 
+            "Error: %s should be an array of objects; Inspect \"%s\"", 
+            allStellarObjects->string, json_filename
+        );
+        return NULL;
+    }
+
+    dest_array = (StellarObject **)malloc(cJSON_GetArraySize(allStellarObjects) * sizeof(StellarObject *));
+
     cJSON_ArrayForEach(iterator, allStellarObjects)
     {
-        static const char* err_message = "StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
+        if (!cJSON_IsObject(iterator))
+        {
+            fprintf(
+                stderr,
+                "Error: %s should only contain JSON objects; Inspect arrray item idx.#%d in \"%s\"", 
+                allStellarObjects->string, *array_size, json_filename
+            );
+
+            for (int i = 0; i < *array_size; ++i)
+                deleteStellarObject(dest_array[i]);
+
+            free(dest_array);
+            
+            return NULL;
+        }
+
+        static const char* err_message = "Error: JSON array idx.#%d - StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
+        char* err_field = NULL;
+
 
         cJSON *name = cJSON_GetObjectItemCaseSensitive(iterator, "name");
         cJSON *radius = cJSON_GetObjectItemCaseSensitive(iterator, "radius");
@@ -262,38 +291,31 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
 
 
         if (!cJSON_IsString(name) || name->valuestring == NULL)
-        {
-            fprintf(stderr, err_message, "name", json_filename);
-            return NULL;
-        }
+            err_field = name->string;
+
         if (!cJSON_IsNumber(radius))
-        {
-            fprintf(stderr, err_message, "radius", json_filename);
-            return NULL;
-        }
+            err_field = radius->string;
+
         if (!cJSON_IsNumber(lin_velocity))
-        {
-            fprintf(stderr, err_message, "lin_velocity", json_filename);
-            return NULL;
-        }
+            err_field = lin_velocity->string;
+
         if (!cJSON_IsString(parent) && !cJSON_IsNull(parent))
-        {
-            fprintf(stderr, err_message, "parent", json_filename);
-            return NULL;
-        }
+            err_field = parent->string;
+
         if (!cJSON_IsNumber(parent_dist))
-        {
-            fprintf(stderr, err_message, "parent_dist", json_filename);
-            return NULL;
-        }
+            err_field = parent_dist->string;
+
         if (!cJSON_IsNumber(solar_tilt))
-        {
-            fprintf(stderr, err_message, "solar_tilt", json_filename);
-            return NULL;
-        }
+            err_field = solar_tilt->string;
+
         if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
+            err_field = color->string;
+
+
+        if (err_field != NULL)
         {
-            fprintf(stderr, err_message, "color", json_filename);
+            fprintf(stderr, err_message, *array_size, err_field, json_filename);
+            free(dest_array);
             return NULL;
         }
 
@@ -301,13 +323,29 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
 
         if (!cJSON_IsNull(parent))
         {
-            for (int i = 0; i < *array_size; ++i)
+            int i;
+
+            for (i = 0; i < *array_size; ++i)
             {
                 if (strcmp(parent->valuestring, dest_array[i]->name) != 0)
                     continue;
                 
                 parent_raw = dest_array[i];
                 break;
+            }
+
+            if (i == *array_size)
+            {
+                printf(
+                    "Warning: %s was declared as %s's planetary anchor but this StellarObject is not found and will thus not render.\n"
+                    "         Inspect JSON file \"%s\"\n"
+                    "         If %s does exist within the file, reorder it so that it's above %s\n",
+                    parent->valuestring,
+                    name->valuestring,
+                    json_filename,
+                    parent->valuestring,
+                    name->valuestring
+                );
             }
         }
         
@@ -328,12 +366,6 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
         );
 
         *array_size += 1;
-
-        if (*array_size == mem_capacity)
-        {
-            mem_capacity += 20;
-            dest_array = (StellarObject **)realloc(dest_array, mem_capacity * sizeof(StellarObject *));
-        }
     }
 
     cJSON_Delete(json);
