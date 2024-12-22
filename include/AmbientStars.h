@@ -44,17 +44,19 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
         stars->quads[i] = gluNewQuadric();
         gluQuadricDrawStyle(stars->quads[i], GLU_FILL);
 
-        float u = (float)(2.0 * M_PI * ((double)rand() / RAND_MAX) - M_PI);
-        float v = (float)(2.0 * M_PI * ((double)rand() / RAND_MAX) - M_PI);
+        float x = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
+        float y = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
+        float z = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
 
-        float sin_vert = sinf(u);
-        float sin_horz = sinf(v);
-        float cos_vert = cosf(u);
-        float cos_horz = cosf(v);
+        float len = sqrtf(x * x + y * y + z * z);
 
-        stars->positions[i][0] = cos_vert * sin_horz * (POVanchor->renderDistance * 0.92f);
-        stars->positions[i][1] = sin_vert * (POVanchor->renderDistance * 0.92f);
-        stars->positions[i][2] = cos_vert * cos_horz * (POVanchor->renderDistance * 0.92f);
+        x /= len;
+        y /= len;
+        z /= len;
+
+        stars->positions[i][0] = x * (POVanchor->renderDistance * 0.8f);
+        stars->positions[i][1] = y * (POVanchor->renderDistance * 0.8f);
+        stars->positions[i][2] = z * (POVanchor->renderDistance * 0.8f);
     }
 
     return stars;

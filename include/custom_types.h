@@ -36,12 +36,8 @@ char* strBuild(const char* org)
 
 float AUtoR(float au)
 {
-    return au * 2000;
+    return au * 250;
 }
 
-float AUtoD(float au)
-{
-    return au * 200;
-}
 
 #endif // CUSTOM_TYPES_H

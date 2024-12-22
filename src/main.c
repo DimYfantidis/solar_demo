@@ -12,9 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#include <cJSON.h>
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h>
-#include <cJSON.h>
 
 #include "Timer.h"
 #include "Camera.h"
@@ -62,11 +63,13 @@ void display(void);
 
 int main(int argc, char* argv[])
 {
+    // argv[1] should be the filepath of "_constants.json" (found within "./data" dir)
     if (argc < 2)
     {
         fprintf(stderr, "Please specify the JSON file of the dynamically loaded constants.\n");
         return EXIT_FAILURE;
     }
+    // argv[2] should be the filepath of the astronomical system's data. 
     if (argc < 3)
     {
         fprintf(stderr, "Please specify the JSON file of the astronomical system's objects' data.\n");
@@ -122,7 +125,7 @@ int main(int argc, char* argv[])
 
     printf("[3] >>> Deallocated all memory.\n");
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -283,7 +286,7 @@ void initGlobals(int argc, char* argv[])
         16.47074f, 32.79276f,  5.98598f,
         -0.444f, -0.881f, -0.163f,
         .0f, 1.0f, .0f,
-        100000.0f
+        20000.0f
     );
 
     // ----------- Stellar Objects (BEGIN) ----------- //
