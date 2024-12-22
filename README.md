@@ -19,11 +19,11 @@
         2. [StellarObject](#stellarobject)
         3. [Camera](#camera)
         4. [AmbientStars](#ambientstars)
-        5. [MenuScreen] (#menuscreen)
-        6. [Callbacks] (#callbacks)
-        7. [TextRendering] (#textrendering)
-        8. [HeadsUpDisplay] (#headsupdisplay)
-        9. [Timer] (#timer)
+        5. [MenuScreen](#menuscreen)
+        6. [Callbacks](#callbacks)
+        7. [TextRendering](#textrendering)
+        8. [HeadsUpDisplay](#headsupdisplay)
+        9. [Timer](#timer)
 
 
 ### System Requirements
