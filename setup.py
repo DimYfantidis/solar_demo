@@ -7,6 +7,24 @@ import shutil
 import subprocess
 
 
+HELP_MESSAGE = """
+    * -build-depend: Compiles the dependencies to produce the resulting *.dll and *.lib files. 
+                     Should only be used once when seting up the project but can be ommited later.
+                     Can be used independently of -build-proj and -run.
+                     
+    * -build-proj:   Links the dependencies' generated *.dll and .*lib files and compiles the project. 
+                     The resulting executable is situated somewhere within ./build depending on the used C compiler 
+                     (./build/Release for MSVC). It can be used independently of -build-depend and -run.
+                   
+    * -run:          Paired with the /planets:* argument, it executes the generated executable found within the 
+                     ./build directory. It can be used independently of -build-depend and -build-proj.
+                     
+    * /planets:*:    Paired with the -run argument, it specifies the data of the astronomical objects found in 
+                     ./data/*.json. In this case, the astronomical system's data that will be used are situated in 
+                     ./data/the_solar_system.json. Read the documentation's "JSON data" subsection under 
+                     the "Implementation" section for more details.
+"""
+
 def onerror_handler(func, path: str, exc_info):
     """
     Error handler for ``shutil.rmtree``.
@@ -79,6 +97,10 @@ def setup_dependency(
 
 if __name__ == '__main__':
     
+    if "-help" in argv:
+        print(HELP_MESSAGE)
+        exit(0)
+        
     if "-clear" in argv or "-cleanse" in argv:
         
         # Clears the project's cache
