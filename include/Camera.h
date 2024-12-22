@@ -3,7 +3,7 @@
 
 #include <GL/glut.h>
 
-#include "custom_types.h"
+#include "CustomTypes.h"
 #include "KeyboardCallback.h"
 #include "PassiveMotionCallback.h"
 

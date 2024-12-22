@@ -9,7 +9,7 @@
 #include <math.h>
 #include <GL/glut.h>
 
-#include "custom_types.h"
+#include "CustomTypes.h"
 
 
 float CameraAngleHorizontal;

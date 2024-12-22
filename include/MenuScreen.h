@@ -7,7 +7,7 @@
 #include <GL/freeglut.h>
 
 #include "Camera.h"
-#include "custom_types.h"
+#include "CustomTypes.h"
 #include "TextRendering.h"
 
 

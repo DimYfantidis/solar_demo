@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "custom_types.h"
+#include "CustomTypes.h"
 
 
 struct Timer

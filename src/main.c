@@ -20,6 +20,7 @@
 #include "Timer.h"
 #include "Camera.h"
 #include "MenuScreen.h"
+#include "CustomTypes.h"
 #include "AmbientStars.h"
 #include "TextRendering.h"
 #include "MouseCallback.h"

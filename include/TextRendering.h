@@ -4,7 +4,7 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 
-#include "custom_types.h"
+#include "CustomTypes.h"
 
 
 float windowMatrix[16];

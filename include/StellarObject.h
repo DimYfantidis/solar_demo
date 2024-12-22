@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <GL/freeglut.h>
 
-#include "custom_types.h"
+#include "CustomTypes.h"
 #include "TextRendering.h"
 #include "KeyboardCallback.h"
 
