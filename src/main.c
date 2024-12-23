@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
     initGlobals(argc, argv); 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
-	glutInitWindowSize(window_width, window_height);
+	glutInitWindowSize(1280, 720);
 	window_id = glutCreateWindow("Solar System - exhibition");
 
     if (fullscreen_enabled)
@@ -92,8 +92,8 @@ int main(int argc, char* argv[])
         1.0f
     );
 	glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
     printf("[1] >>> Hello, Universe!\n");
 
@@ -104,6 +104,7 @@ int main(int argc, char* argv[])
     callbackPassiveMotion(windowCentreX, windowCentreY);
     callbackPassiveMotion(windowCentreX, windowCentreY);
     
+
     glutDisplayFunc(display);
     glutKeyboardFunc(callbackKeyboard);
     glutKeyboardUpFunc(callbackKeyboardUp);
@@ -112,6 +113,19 @@ int main(int argc, char* argv[])
     glutMouseWheelFunc(callbackMouseWheel);
     glutPassiveMotionFunc(callbackPassiveMotion);
 
+
+	// ----------- Window Matrix (BEGIN) ----------- //
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	// Initialization of Window Matrix for on-screen string rendering.
+	glPushMatrix();
+	{
+		gluOrtho2D(0.0, (double)window_width, 0.0, (double)window_height);
+		glGetFloatv(GL_PROJECTION_MATRIX, windowMatrix);
+	}
+	glPopMatrix();
+	// ----------- Window Matrix (BEGIN) ----------- //
 
     {
         Timer* programTimer = initTimer("glutMainLoop");
@@ -156,12 +170,10 @@ void display(void)
     printf("Clearing the screen (elapsed: %.3f sec)\n", elapsed_seconds);
 #endif
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     camera->movementSpeed *= moveSpeedScaleFactor;
     updateCamera(camera);
     moveSpeedScaleFactor = 1.0f;
-
-    renderMenuScreen(planetMenuScreen);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -182,7 +194,21 @@ void display(void)
         renderStellarObject(stellarObjects[i], true, cachedAncestors[i], &numCachedAncestors[i]);
     }
 
+    // renderMenuScreen(planetMenuScreen);
+
     renderStars(starsSkyBox);
+
+
+    static char logBuffer[1024];
+
+    snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", framerate);
+    renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+    snprintf(logBuffer, sizeof(logBuffer), "Camera Position: (%.3f, %.3f, %.3f)", camera->position[0], camera->position[1], camera->position[2]);
+    renderStringOnScreen(0.0, window_height - 30.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+    snprintf(logBuffer, sizeof(logBuffer), "Simulation Speed: %.4f", simulationSpeed);
+    renderStringOnScreen(0.0, window_height - 45.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -275,20 +301,6 @@ void initGlobals(int argc, char* argv[])
         keystrokes[i] = false;
     }
 
-
-    // ----------- Window Matrix (BEGIN) ----------- //
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glPushMatrix();
-	{
-	    // Initialization of Window Matrix for on-screen string rendering.
-		gluOrtho2D(0.0, (double)window_width, 0.0, (double)window_height);
-		glGetFloatv(GL_PROJECTION_MATRIX, windowMatrix);
-	}
-	glPopMatrix();
-    // ----------- Window Matrix (END) ----------- //
-
     camera = initCamera(
         // Initial camera position .
         16.47074f, 32.79276f,  5.98598f,
@@ -320,6 +332,7 @@ void initGlobals(int argc, char* argv[])
     
 
     mainMenuScreen = initMenuScreen(
+        camera,
         4,
         "Goofy",
         "Goofy 2",
@@ -328,7 +341,7 @@ void initGlobals(int argc, char* argv[])
     );
     setMenuScreenBoxDimensions(mainMenuScreen, 0.12f, 0.04f);
 
-    planetMenuScreen = initMenuScreenEmpty(numStellarObjects);
+    planetMenuScreen = initMenuScreenEmpty(camera, numStellarObjects);
 
     for (int i = 0; i < numStellarObjects; ++i) {
         assignMenuScreenElement(planetMenuScreen, i, stellarObjects[i]->name);

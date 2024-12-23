@@ -13,6 +13,7 @@
 
 struct MenuScreen
 {
+    Camera* POVanchor;
     char** optionNames;
     int numOptions;
     int currentlySelectedOption;
@@ -22,10 +23,11 @@ struct MenuScreen
 typedef struct MenuScreen MenuScreen;
 
 
-MenuScreen* initMenuScreen(int n_options, ...)
+MenuScreen* initMenuScreen(Camera* camera, int n_options, ...)
 {
     MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
 
+    menuScreen->POVanchor = camera;
     menuScreen->numOptions = n_options;
     menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
 
@@ -45,10 +47,11 @@ MenuScreen* initMenuScreen(int n_options, ...)
     return menuScreen;
 }
 
-MenuScreen* initMenuScreenEmpty(int n_options)
+MenuScreen* initMenuScreenEmpty(Camera* camera, int n_options)
 {
     MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
 
+    menuScreen->POVanchor = camera;
     menuScreen->numOptions = n_options;
     menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
 
@@ -86,18 +89,65 @@ bool assignMenuScreenElement(MenuScreen* menuScreen, int idx, const char* option
 
 void renderMenuScreen(MenuScreen* menuScreen)
 {
-    return;
-
     static const float spaceBetweenBoxes = 0.001f;
 
     float mainBoxWidth = menuScreen->optionBoxWidth + 2 * spaceBetweenBoxes;
     float mainBoxHeight = (menuScreen->numOptions + 1) * spaceBetweenBoxes
         + menuScreen->numOptions * menuScreen->optionBoxHeight;
 
-    for (int i = 1; i < menuScreen->numOptions; ++i)
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    
+    glLoadIdentity();
+
+#define SCALE_X 0.0001f
+#define SCALE_Y 0.0001f
+#define SCALE_Z 0.0001f
+
+    gluPerspective(60, 16 / 9, 0.01, 2.0 / SCALE_Z);
+
+    gluLookAt(
+        0, 0, 1,
+        0, 0, -1,
+        0, 1, 0
+    );
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    glColor3f(0.2f, 0.2f, 0.2f);
+
+    glLoadIdentity();
+    glBegin(GL_QUADS);
     {
-        // ...
+        glVertex3f(.05f / SCALE_X, (-0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
+        glVertex3f(-.05f / SCALE_X, (-0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
+        glVertex3f(-.05f / SCALE_X, (0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
+        glVertex3f(.05f / SCALE_X, (0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
     }
+    glEnd();
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    
+    for (int i = 0; i < menuScreen->numOptions; ++i)
+    {
+        glLoadIdentity();
+        glScalef(SCALE_X, SCALE_Y, SCALE_Z);
+        unsigned char* opt = (unsigned char*)menuScreen->optionNames[i];
+        glTranslatef(
+            -0.05f / SCALE_X, 
+            (-.03f * (i - menuScreen->numOptions / 2)) / SCALE_Y, 
+            .2f / SCALE_Z);
+        glutStrokeString(GLUT_STROKE_MONO_ROMAN, opt);
+    }
+
+#undef SCALE_X
+#undef SCALE_Y
+#undef SCALE_Z
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
 }
 
 void deleteMenuScreen(MenuScreen* menuScreen)

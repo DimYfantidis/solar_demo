@@ -13,23 +13,47 @@ float windowMatrix[16];
 void renderStringOnScreen(
     float x, float y, 
     void* font, const char* string, 
-    byte r, byte g, byte b
+    ubyte r, ubyte g, ubyte b
 )
 {
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
     {
-        glLoadMatrixf(windowMatrix);
-        //glDisable(GL_LIGHTING);
-        glColor3ub(r, g, b);
-        glRasterPos2f(x, y);
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        {
+            glLoadMatrixf(windowMatrix);
+            // glDisable(GL_LIGHTING);
 
-        glutBitmapString(font, (const unsigned char*)string);
-        //glEnable(GL_LIGHTING);
+            glColor4f(r, g, b, 1.0f);
+            glRasterPos2f(x, y);
+
+            glutBitmapString(font, (const unsigned char*)string);
+            //glEnable(GL_LIGHTING);
+        }
+        glPopMatrix();
     }
-    glPopMatrix();
+    glPopAttrib();
 }
 
+void re(float x, float y, void* font, const char* string, const vector3f rgb)
+{
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
+    {
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        {
+            glLoadMatrixf(windowMatrix);
+            glDisable(GL_LIGHTING);
+            glColor3f(rgb[0], rgb[1], rgb[2]);
+            glRasterPos2f(x, y);
+
+            glutBitmapString(font, (const unsigned char*)string);
+            glEnable(GL_LIGHTING);
+        }
+        glPopMatrix();
+    }
+    glPopAttrib();
+}
 
 void renderStringInWorld(
     float x, float y, float z, 
