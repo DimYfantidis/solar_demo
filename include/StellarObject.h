@@ -11,20 +11,34 @@
 #include "KeyboardCallback.h"
 
 
-struct StellarObject
+typedef struct StellarObject
 {
     char* name;
+
     GLUquadric* quad;
+
+    // The centre of the body's rotation.
     struct StellarObject* parent;
+
     vector3f position;
+
     float radius;
-    float parametric_angle;
+
+    // The body's linear velocity along its trajectory in AU/h.
     float velocity;
+
+    // Value of the body's parametric equation of its trajectory. 
+    float parametric_angle;
+
+    // Distance from the body's centre of rotation, i.e. its trajectory's radius in AU.
     float parent_dist;
+
+    // The trajectory's angle relevant to the parent's coordinate system.
     float solar_tilt;
+
     vector3ub color;
-};
-typedef struct StellarObject StellarObject;
+
+} StellarObject;
 
 
 StellarObject* initStellarObject(
@@ -62,7 +76,7 @@ StellarObject* initStellarObject(
     return p;
 }
 
-StellarObject* colorise3f(StellarObject* p, float red, float green, float blue)
+StellarObject* coloriseStellarObject3f(StellarObject* p, float red, float green, float blue)
 {
     p->color[0] = (ubyte)(red * 255);
     p->color[1] = (ubyte)(green * 255);
@@ -71,7 +85,7 @@ StellarObject* colorise3f(StellarObject* p, float red, float green, float blue)
     return p;
 }
 
-StellarObject* colorise3ub(StellarObject* p, ubyte red, ubyte green, ubyte blue)
+StellarObject* coloriseStellarObject3ub(StellarObject* p, ubyte red, ubyte green, ubyte blue)
 {
     p->color[0] = red;
     p->color[1] = green;
@@ -95,7 +109,7 @@ void updateStellarObject(StellarObject* p, float speed_factor)
 {
     p->parametric_angle += speed_factor * p->velocity;
 
-    if (p->parametric_angle > M_PI) {
+    if (p->parametric_angle > (float)M_PI) {
         p->parametric_angle -= (float)(2 * M_PI);
     }
 
@@ -106,6 +120,13 @@ void updateStellarObject(StellarObject* p, float speed_factor)
     p->position[2] = sin_ang * p->parent_dist;
 }
 
+// Returns an array of the body's system centre of rotation, along with 
+// each subsequent system's centre of rotation, recursively. 
+//
+// E.g:
+//  - Earth returns [The Sun]
+//  - Venus returns [The Sun]
+//  - Moon returns  [Earth, The Sun]
 StellarObject** getStellarObjectAncestors(StellarObject* p, int* n_ancestors)
 {
     StellarObject* cntr_ptr = p->parent;
@@ -135,7 +156,7 @@ StellarObject** getStellarObjectAncestors(StellarObject* p, int* n_ancestors)
 
 void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject** ancestors, int* n_ancestors)
 {
-    bool uses_cached_ancestors = (ancestors == NULL ? false : true);
+    bool usesCachedAncestors = (ancestors == NULL ? false : true);
 
     int tmp_n_ancestors;
 
@@ -146,10 +167,10 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     if (n_ancestors == NULL)
         n_ancestors = &tmp_n_ancestors;
 
-    if (!uses_cached_ancestors)
+    if (!usesCachedAncestors)
         ancestors = getStellarObjectAncestors(p, n_ancestors);
 
-    // Apply the transformations of all previous astrological systems' anchors. 
+    // Apply the transformations of all previous astrological systems' centres of rotation. 
     for (int i = *n_ancestors - 1; i >= 0; --i) 
     {
         glRotatef(ancestors[i]->solar_tilt, 0, 0, 1);
@@ -161,7 +182,7 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
         );
     }
 
-    if (!uses_cached_ancestors)
+    if (!usesCachedAncestors)
         free(ancestors);
 
     glRotatef(p->solar_tilt, 0, 0, 1);
@@ -289,33 +310,35 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
         cJSON *solar_tilt = cJSON_GetObjectItemCaseSensitive(iterator, "solar_tilt");
         cJSON *color = cJSON_GetObjectItemCaseSensitive(iterator, "color");
 
+        printf("%x", solar_tilt);
 
         if (!cJSON_IsString(name) || name->valuestring == NULL)
-            err_field = name->string;
+            err_field = strBuild("name");
 
         if (!cJSON_IsNumber(radius))
-            err_field = radius->string;
+            err_field = strBuild("radius");
 
         if (!cJSON_IsNumber(lin_velocity))
-            err_field = lin_velocity->string;
+            err_field = strBuild("lin_velocity");
 
         if (!cJSON_IsString(parent) && !cJSON_IsNull(parent))
-            err_field = parent->string;
+            err_field = strBuild("parent");
 
         if (!cJSON_IsNumber(parent_dist))
-            err_field = parent_dist->string;
+            err_field = strBuild("parent_dist");
 
         if (!cJSON_IsNumber(solar_tilt))
-            err_field = solar_tilt->string;
+            err_field = strBuild("solar_tilt");
 
         if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
-            err_field = color->string;
+            err_field = strBuild("color");
 
 
         if (err_field != NULL)
         {
             fprintf(stderr, err_message, *array_size, err_field, json_filename);
             free(dest_array);
+            free(err_field);
             return NULL;
         }
 
@@ -353,7 +376,7 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
         cJSON* g = cJSON_GetArrayItem(color, 1);
         cJSON* b = cJSON_GetArrayItem(color, 2);
 
-        dest_array[*array_size] = colorise3ub(
+        dest_array[*array_size] = coloriseStellarObject3ub(
                 initStellarObject(
                     name->valuestring,
                     (float)radius->valuedouble,
@@ -369,9 +392,8 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
     }
 
     cJSON_Delete(json);
+    
     free(buffer);
-
-    dest_array = (StellarObject **)realloc(dest_array, (*array_size) * sizeof(StellarObject *));
 
     return dest_array;
 }

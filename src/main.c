@@ -37,7 +37,7 @@ bool fullscreen_enabled;
 
 double framerate;
 
-float simulation_speed;
+float simulationSpeed;
 
 clock_t refresh_ts;
 
@@ -57,7 +57,6 @@ MenuScreen* mainMenuScreen;
 MenuScreen* planetMenuScreen;
 
 
-void windowControl(void);
 void initGlobals(int, char**);
 void deallocateAll(void);
 void display(void);
@@ -101,9 +100,10 @@ int main(int argc, char* argv[])
     glutSetCursor(GLUT_CURSOR_NONE);
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
+    // Initialise the callback function's static variables with the provided arguments.
     callbackPassiveMotion(windowCentreX, windowCentreY);
     callbackPassiveMotion(windowCentreX, windowCentreY);
-
+    
     glutDisplayFunc(display);
     glutKeyboardFunc(callbackKeyboard);
     glutKeyboardUpFunc(callbackKeyboardUp);
@@ -136,6 +136,7 @@ void display(void)
 {
     if (keystrokes[27])
     {
+        // Exit program when ESC is pressed.
         glutDestroyWindow(window_id);
         glutLeaveMainLoop();
         return;
@@ -143,6 +144,7 @@ void display(void)
 
     double elapsed_seconds = (double)(clock() - refresh_ts) / CLOCKS_PER_SEC;
 
+    // Force framerate cap using time scheduling variables. 
     if (elapsed_seconds < 1.0 / framerate) 
     {
         glutPostRedisplay();
@@ -165,10 +167,10 @@ void display(void)
     glLoadIdentity();
 
     if (keystrokes['+']) {
-        simulation_speed *= 1.05f;
+        simulationSpeed *= 1.05f;
     }
     if (keystrokes['-']) {
-        simulation_speed /= 1.05f;
+        simulationSpeed /= 1.05f;
     }
 
     for (int i = 0; i < numStellarObjects; ++i)
@@ -176,7 +178,10 @@ void display(void)
         if (stellarObjects[i]->parent == NULL)
             continue;
 
-        updateStellarObject(stellarObjects[i], simulation_speed);
+        // Update celestial body's position after moving 
+        // by v * dt, where v is its linear velocity.
+        updateStellarObject(stellarObjects[i], simulationSpeed);
+        // Render the body as well as its trajectory.
         renderStellarObject(stellarObjects[i], true, cachedAncestors[i], &numCachedAncestors[i]);
     }
 
@@ -191,12 +196,12 @@ void initGlobals(int argc, char* argv[])
 {
     srand((unsigned int)time(NULL));
 
+    // Default Values
     window_width = 1280;
     window_height = 720;
-
     framerate = 60.0;
 
-    // open the JSON file 
+    // open the _constants.json file 
     FILE *fp = fopen(argv[1], "r"); 
 
     if (fp == NULL) 
@@ -205,7 +210,7 @@ void initGlobals(int argc, char* argv[])
         exit(EXIT_FAILURE);
     } 
 
-    // read the file contents into a string 
+    // Read the file contents into a string 
     const size_t JSON_BUFFER_SIZE = 1024 * 1024;
 
     char* buffer = (char *)malloc(JSON_BUFFER_SIZE * sizeof(char));
@@ -255,16 +260,20 @@ void initGlobals(int argc, char* argv[])
     cJSON_Delete(json); 
     free(buffer);
 
+    // Auxiliary variables for centering the mouse pointer using glutWarpPointer().
     windowCentreX = window_width / 2;
     windowCentreY = window_height / 2;
 
+    // Independent variables for the parametric equation of a sphere.
+    // Used for controlling the camera's orientation through mouse movement.
     CameraAngleHorizontal = .0f;
     CameraAngleVertical = .0f;
 
     mouseSensitivity = .002f;
 
-    simulation_speed = 1.0f;
+    simulationSpeed = 1.0f;
 
+    // Used for keyboard input (see KeyboardCallback.h)
     for (int i = 0; i < sizeof(keystrokes) / sizeof(keystrokes[0]); ++i) {
         keystrokes[i] = false;
     }
@@ -284,9 +293,13 @@ void initGlobals(int argc, char* argv[])
     // ----------- Window Matrix (END) ----------- //
 
     camera = initCamera(
+        // Initial camera position .
         16.47074f, 32.79276f,  5.98598f,
+        // Initial camera orientation.
         -0.444f, -0.881f, -0.163f,
+        // Up vector.
         .0f, 1.0f, .0f,
+        // Render distance in world units.
         20000.0f
     );
 
@@ -298,6 +311,7 @@ void initGlobals(int argc, char* argv[])
         exit(EXIT_FAILURE);
 
     cachedAncestors = (StellarObject ***)malloc(numStellarObjects * sizeof(StellarObject **));
+    // Number of ancestors for each celestial body. 
     numCachedAncestors = (int *)malloc(numStellarObjects * sizeof(int));
 
     for (int i = 0; i < numStellarObjects; ++i)
@@ -306,7 +320,7 @@ void initGlobals(int argc, char* argv[])
         // printf("%s -> cached: %d\n", stellarObjects[i]->name, numCachedAncestors[i]);
     }
     // ----------- Stellar Objects (END) ----------- //
-
+    
 
     mainMenuScreen = initMenuScreen(
         4,

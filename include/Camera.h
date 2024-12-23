@@ -38,6 +38,7 @@ Camera* initCamera(
 
     float len = vectorLength3fv(camera->lookAt);
 
+    // Regularization, if needed.
     camera->lookAt[0] /= len;
     camera->lookAt[1] /= len;
     camera->lookAt[2] /= len;
@@ -56,7 +57,7 @@ void updateCamera(Camera* camera)
 {   
     glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-    gluPerspective(60.0, 16.0 / 9.0, 0.1, (double)camera->renderDistance);
+    gluPerspective(60.0, 16.0 / 9.0, 0.01, (double)camera->renderDistance);
 
     float sin_vert = sinf(CameraAngleVertical);
 	float sin_horz = sinf(CameraAngleHorizontal);
@@ -68,15 +69,6 @@ void updateCamera(Camera* camera)
     camera->lookAt[1] = sin_vert;
     camera->lookAt[2] = cos_vert * cos_horz;
 
-#ifdef PROJ_DEBUG
-    printf(
-        "Camera Orientation is: (%.3f, %.3f, %.3f)\n", 
-        camera->lookAt[0],
-        camera->lookAt[1],
-        camera->lookAt[2]
-    );
-#endif
-
     float movementSpeed = camera->movementSpeed;
 
     if (shift_key_down) 
@@ -86,32 +78,38 @@ void updateCamera(Camera* camera)
 
     if (keystrokes['W'])
     {
+        // Forward movement (towards the direction of the camera).
         camera->position[0] += camera->lookAt[0] * movementSpeed;
         camera->position[1] += camera->lookAt[1] * movementSpeed;
         camera->position[2] += camera->lookAt[2] * movementSpeed;
     }
     if (keystrokes['S'])
     {
+        // Backwards movement.
         camera->position[0] -= camera->lookAt[0] * movementSpeed;
         camera->position[1] -= camera->lookAt[1] * movementSpeed;
         camera->position[2] -= camera->lookAt[2] * movementSpeed;
     }
     if (keystrokes['A'])
     {
+        // Left movement (relevant to the torso vector's perpendicular vector).
         camera->position[0] += cos_horz * movementSpeed;
         camera->position[2] -= sin_horz * movementSpeed;
     }
     if (keystrokes['D'])
     {
+        // Right movement.
         camera->position[0] -= cos_horz * movementSpeed;
         camera->position[2] += sin_horz * movementSpeed;
     }
     if (keystrokes['X'])
     {
+        // Downwards movement.
         camera->position[1] -= movementSpeed;
     }
     if (keystrokes[' '])
     {
+        // Upwards movement.
         camera->position[1] += movementSpeed;
     }
 

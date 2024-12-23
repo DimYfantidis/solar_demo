@@ -36,7 +36,7 @@ char* strBuild(const char* org)
 
 float AUtoR(float au)
 {
-    return au * 250;
+    return au * 450;
 }
 
 
