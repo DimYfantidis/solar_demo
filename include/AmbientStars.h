@@ -14,15 +14,20 @@
 #include "Camera.h"
 
 
-struct AmbientStars
+typedef struct AmbientStars
 {
+    // The centre of the sphere with stars.
     Camera* POVanchor;
+
     int numberOfStars;
+
     vector3f* positions;
+
     GLUquadric** quads;
-    float size_in_world;
-};
-typedef struct AmbientStars AmbientStars;
+
+    float sizeInWorld;
+
+} AmbientStars;
 
 
 AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
@@ -35,7 +40,7 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
 
     stars->POVanchor = POVanchor;
 
-    stars->size_in_world = POVanchor->renderDistance * 0.0007f;
+    stars->sizeInWorld = POVanchor->renderDistance * 0.0007f;
 
     stars->quads = (GLUquadric **)malloc(numberOfStars * sizeof(GLUquadric *));
 
@@ -81,12 +86,21 @@ void renderStars(AmbientStars* stars)
     for (int i = 0; i < stars->numberOfStars; ++i)
     {
         glPushMatrix();
+
         glTranslatef(
-            stars->positions[i][0] + stars->POVanchor->position[0], 
-            stars->positions[i][1] + stars->POVanchor->position[1],
-            stars->positions[i][2] + stars->POVanchor->position[2]
+           stars->POVanchor->position[0], 
+           stars->POVanchor->position[1],
+           stars->POVanchor->position[2]
         );
-        gluSphere(stars->quads[i], stars->size_in_world, 3, 3);
+
+        glTranslatef(
+            stars->positions[i][0], 
+            stars->positions[i][1],
+            stars->positions[i][2]
+        );
+
+        gluSphere(stars->quads[i], stars->sizeInWorld, 3, 3);
+
         glPopMatrix();
     }
 }

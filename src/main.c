@@ -175,9 +175,6 @@ void display(void)
 
     for (int i = 0; i < numStellarObjects; ++i)
     {
-        if (stellarObjects[i]->parent == NULL)
-            continue;
-
         // Update celestial body's position after moving 
         // by v * dt, where v is its linear velocity.
         updateStellarObject(stellarObjects[i], simulationSpeed);

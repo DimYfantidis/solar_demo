@@ -8,15 +8,19 @@
 #include "PassiveMotionCallback.h"
 
 
-struct Camera
+typedef struct Camera
 {
     vector3f position;
+
     vector3f lookAt;
+
     vector3f upVector;
+
     float movementSpeed;
+
     float renderDistance;
-};
-typedef struct Camera Camera;
+    
+} Camera;
 
 
 Camera* initCamera(

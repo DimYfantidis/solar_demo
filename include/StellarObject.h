@@ -24,17 +24,20 @@ typedef struct StellarObject
 
     float radius;
 
-    // The body's linear velocity along its trajectory in AU/h.
-    float velocity;
+    // The body's linear velocity along its trajectory in rad/h.
+    float angularVelocity;
+
+    // The time period in which the body completes its orbit in solar days.
+    float orbitalPeriod;
 
     // Value of the body's parametric equation of its trajectory. 
-    float parametric_angle;
+    float parametricAngle;
 
     // Distance from the body's centre of rotation, i.e. its trajectory's radius in AU.
-    float parent_dist;
+    float parentDistance;
 
     // The trajectory's angle relevant to the parent's coordinate system.
-    float solar_tilt;
+    float solarTilt;
 
     vector3ub color;
 
@@ -44,7 +47,7 @@ typedef struct StellarObject
 StellarObject* initStellarObject(
     const char* name, 
     float radius, 
-    float lin_velocity, 
+    float orbit_period,
     StellarObject* parent, 
     float parent_dist,
     float solar_tilt
@@ -58,14 +61,24 @@ StellarObject* initStellarObject(
     p->name = strBuild(name);
     p->radius = AUtoR(radius);
     p->parent = parent;
-    p->solar_tilt = solar_tilt;
+    p->solarTilt = solar_tilt;
     p->quad = gluNewQuadric();
-    p->parametric_angle = (float)(-M_PI);
-    p->parent_dist = AUtoR(parent_dist);
-    p->velocity = AUtoR(lin_velocity);
+    p->parametricAngle = (float)(-M_PI);
+    p->parentDistance = AUtoR(parent_dist);
+    p->orbitalPeriod = orbit_period;
 
-    if (parent_dist != .0f) {
-        p->velocity /= parent_dist;
+    if (p->orbitalPeriod == .0f)
+    {
+        fprintf(
+            stderr, 
+            "Warning: %s's orbitalPeriod was declared 0 - Proceeding with 0 angular velocity; Was this intentional?\n", 
+            name
+        );
+        p->angularVelocity = .0f;
+    }
+    else
+    {
+        p->angularVelocity = (float)(2.0 * M_PI / ((double)orbit_period * 24.0));
     }
 
     memset(p->position, (int).0f, sizeof(p->position));
@@ -107,17 +120,17 @@ void deleteStellarObject(StellarObject* p)
 
 void updateStellarObject(StellarObject* p, float speed_factor)
 {
-    p->parametric_angle += speed_factor * p->velocity;
+    p->parametricAngle += speed_factor * p->angularVelocity;
 
-    if (p->parametric_angle > (float)M_PI) {
-        p->parametric_angle -= (float)(2 * M_PI);
+    if (p->parametricAngle > (float)M_PI) {
+        p->parametricAngle -= (float)(2 * M_PI);
     }
 
-    float sin_ang = sinf(p->parametric_angle);
-    float cos_ang = cosf(p->parametric_angle);
+    float sin_ang = sinf(p->parametricAngle);
+    float cos_ang = cosf(p->parametricAngle);
 
-    p->position[0] = cos_ang * p->parent_dist;
-    p->position[2] = sin_ang * p->parent_dist;
+    p->position[0] = cos_ang * p->parentDistance;
+    p->position[2] = sin_ang * p->parentDistance;
 }
 
 // Returns an array of the body's system centre of rotation, along with 
@@ -173,7 +186,7 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     // Apply the transformations of all previous astrological systems' centres of rotation. 
     for (int i = *n_ancestors - 1; i >= 0; --i) 
     {
-        glRotatef(ancestors[i]->solar_tilt, 0, 0, 1);
+        glRotatef(ancestors[i]->solarTilt, 0, 0, 1);
 
         glTranslatef(
             ancestors[i]->position[0],
@@ -185,7 +198,7 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     if (!usesCachedAncestors)
         free(ancestors);
 
-    glRotatef(p->solar_tilt, 0, 0, 1);
+    glRotatef(p->solarTilt, 0, 0, 1);
 
     // The above transformations are saved as they will be 
     // used for rendering the StellarObject's trajectory as well.
@@ -213,7 +226,7 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     {
         glColor4f(p->color[0], p->color[1], p->color[2], 0.15f);
 
-        glScalef(p->parent_dist, p->parent_dist, p->parent_dist);
+        glScalef(p->parentDistance, p->parentDistance, p->parentDistance);
 
         glBegin(GL_LINE_LOOP);
         for (float theta = (float)(-M_PI); theta < (float)M_PI; theta += (float)M_PI / 100.0f) 
@@ -225,11 +238,11 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     glPopMatrix();
 }
 
-StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename)
+StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
 {
-    StellarObject** dest_array;
+    StellarObject** destArray;
 
-    *array_size = 0;
+    *arraySize = 0;
 
     // open the JSON file 
     FILE *fp = fopen(json_filename, "r"); 
@@ -278,7 +291,7 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
         return NULL;
     }
 
-    dest_array = (StellarObject **)malloc(cJSON_GetArraySize(allStellarObjects) * sizeof(StellarObject *));
+    destArray = (StellarObject **)malloc(cJSON_GetArraySize(allStellarObjects) * sizeof(StellarObject *));
 
     cJSON_ArrayForEach(iterator, allStellarObjects)
     {
@@ -287,79 +300,90 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
             fprintf(
                 stderr,
                 "Error: %s should only contain JSON objects; Inspect arrray item idx.#%d in \"%s\"", 
-                allStellarObjects->string, *array_size, json_filename
+                allStellarObjects->string, *arraySize, json_filename
             );
 
-            for (int i = 0; i < *array_size; ++i)
-                deleteStellarObject(dest_array[i]);
+            for (int i = 0; i < *arraySize; ++i)
+                deleteStellarObject(destArray[i]);
 
-            free(dest_array);
+            free(destArray);
             
             return NULL;
         }
 
-        static const char* err_message = "Error: JSON array idx.#%d - StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
-        char* err_field = NULL;
+        static const char* errorFieldMessage = "Error: JSON array idx.#%d - StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
+        char* errorField = NULL;
 
 
         cJSON *name = cJSON_GetObjectItemCaseSensitive(iterator, "name");
         cJSON *radius = cJSON_GetObjectItemCaseSensitive(iterator, "radius");
-        cJSON *lin_velocity = cJSON_GetObjectItemCaseSensitive(iterator, "lin_velocity");
+        cJSON *orbit_period = cJSON_GetObjectItemCaseSensitive(iterator, "orbit_period");
         cJSON *parent = cJSON_GetObjectItemCaseSensitive(iterator, "parent");
         cJSON *parent_dist = cJSON_GetObjectItemCaseSensitive(iterator, "parent_dist");
         cJSON *solar_tilt = cJSON_GetObjectItemCaseSensitive(iterator, "solar_tilt");
         cJSON *color = cJSON_GetObjectItemCaseSensitive(iterator, "color");
 
-        printf("%x", solar_tilt);
-
         if (!cJSON_IsString(name) || name->valuestring == NULL)
-            err_field = strBuild("name");
+            errorField = strBuild("name");
 
         if (!cJSON_IsNumber(radius))
-            err_field = strBuild("radius");
+            errorField = strBuild("radius");
 
-        if (!cJSON_IsNumber(lin_velocity))
-            err_field = strBuild("lin_velocity");
+        if (!cJSON_IsNumber(orbit_period) && !cJSON_IsNull(orbit_period))
+            errorField = strBuild("orbit_period");
 
         if (!cJSON_IsString(parent) && !cJSON_IsNull(parent))
-            err_field = strBuild("parent");
+            errorField = strBuild("parent");
 
-        if (!cJSON_IsNumber(parent_dist))
-            err_field = strBuild("parent_dist");
+        if (!cJSON_IsNumber(parent_dist) && !cJSON_IsNull(parent_dist))
+            errorField = strBuild("parent_dist");
 
         if (!cJSON_IsNumber(solar_tilt))
-            err_field = strBuild("solar_tilt");
+            errorField = strBuild("solar_tilt");
 
         if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
-            err_field = strBuild("color");
+            errorField = strBuild("color");
 
-
-        if (err_field != NULL)
+        if (errorField != NULL)
         {
-            fprintf(stderr, err_message, *array_size, err_field, json_filename);
-            free(dest_array);
-            free(err_field);
+            fprintf(stderr, errorFieldMessage, *arraySize, errorField, json_filename);
+            free(destArray);
+            free(errorField);
             return NULL;
         }
 
-        StellarObject* parent_raw = NULL;
+        if (!cJSON_IsNull(parent) && (!cJSON_IsNumber(parent_dist) || !cJSON_IsNumber(orbit_period)))
+        {
+            fprintf(
+                stderr, 
+                "Error: %s's parent was declared non-null but dependent fields are invalid; Inspect \"%s\".\n",
+                name->valuestring, 
+                json_filename
+            );
+            free(destArray);
+            free(errorField);
+            return NULL;
+        }
+
+        StellarObject* parentRaw = NULL;
 
         if (!cJSON_IsNull(parent))
         {
             int i;
 
-            for (i = 0; i < *array_size; ++i)
+            for (i = 0; i < *arraySize; ++i)
             {
-                if (strcmp(parent->valuestring, dest_array[i]->name) != 0)
+                if (strcmp(parent->valuestring, destArray[i]->name) != 0)
                     continue;
                 
-                parent_raw = dest_array[i];
+                parentRaw = destArray[i];
                 break;
             }
 
-            if (i == *array_size)
+            if (i == *arraySize)
             {
-                printf(
+                fprintf(
+                    stderr,
                     "Warning: %s was declared as %s's planetary anchor but this StellarObject is not found and will thus not render.\n"
                     "         Inspect JSON file \"%s\"\n"
                     "         If %s does exist within the file, reorder it so that it's above %s\n",
@@ -371,31 +395,34 @@ StellarObject** loadAllStellarObjects(int* array_size, const char* json_filename
                 );
             }
         }
-        
+
+        float orbitPeriodRaw = (cJSON_IsNull(orbit_period) ? 1.0f : (float)orbit_period->valuedouble);
+        float parentDistanceRaw = (cJSON_IsNull(parent_dist) ? 0.0f : (float)parent_dist->valuedouble);
+
         cJSON* r = cJSON_GetArrayItem(color, 0);
         cJSON* g = cJSON_GetArrayItem(color, 1);
         cJSON* b = cJSON_GetArrayItem(color, 2);
 
-        dest_array[*array_size] = coloriseStellarObject3ub(
+        destArray[*arraySize] = coloriseStellarObject3ub(
                 initStellarObject(
                     name->valuestring,
                     (float)radius->valuedouble,
-                    (float)lin_velocity->valuedouble,
-                    parent_raw,
-                    (float)parent_dist->valuedouble,
+                    orbitPeriodRaw,
+                    parentRaw,
+                    parentDistanceRaw,
                     (float)solar_tilt->valuedouble
             ),
             (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint
         );
 
-        *array_size += 1;
+        *arraySize += 1;
     }
 
     cJSON_Delete(json);
-    
+
     free(buffer);
 
-    return dest_array;
+    return destArray;
 }
 
 #endif // STELLAR_OBJECT_H
