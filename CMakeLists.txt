@@ -13,7 +13,7 @@ link_directories(./dependencies/freeglut/build/lib/Release)
 link_directories(./dependencies/cJSON/build/Release)
 
 # Add source files
-file(GLOB SOURCES "src/*.c")
+file(GLOB SOURCES "src/main.c")
 
 # Add the executable target
 add_executable(${PROJECT_NAME} ${SOURCES})

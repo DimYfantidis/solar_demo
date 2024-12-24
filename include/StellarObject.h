@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <GL/freeglut.h>
 
+#include "Textures.h"
 #include "CustomTypes.h"
 #include "TextRendering.h"
 #include "KeyboardCallback.h"
@@ -41,6 +42,11 @@ typedef struct StellarObject
 
     vector3ub color;
 
+    // The body's OpenGL texture ID
+    GLuint texture; 
+
+    bool hasTexture;
+
 } StellarObject;
 
 
@@ -50,7 +56,9 @@ StellarObject* initStellarObject(
     float orbit_period,
     StellarObject* parent, 
     float parent_dist,
-    float solar_tilt
+    float solar_tilt,
+    GLuint texture,
+    bool hasTexture
 ) 
 {
 #ifdef PROJ_DEBUG
@@ -66,6 +74,8 @@ StellarObject* initStellarObject(
     p->parametricAngle = (float)(-M_PI);
     p->parentDistance = AUtoR(parent_dist);
     p->orbitalPeriod = orbit_period;
+    p->texture = texture;
+    p->hasTexture = hasTexture;
 
     if (p->orbitalPeriod == .0f)
     {
@@ -83,6 +93,9 @@ StellarObject* initStellarObject(
 
     memset(p->position, (int).0f, sizeof(p->position));
     memset(p->position, (int)0x00, sizeof(p->position));
+
+    if (hasTexture)
+        gluQuadricTexture(p->quad, GL_TRUE);
 
     gluQuadricDrawStyle(p->quad, GLU_FILL);
 
@@ -114,6 +127,7 @@ void deleteStellarObject(StellarObject* p)
     {
         gluDeleteQuadric(p->quad);
         free(p->name);
+        // glDeleteTextures(1, &p->texture);
         free(p);
     }
 }
@@ -174,7 +188,11 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     int tmp_n_ancestors;
 
 
-    glColor3ubv(p->color);
+    if (!p->hasTexture)
+        glColor3ubv(p->color);
+    else
+        glColor3f(1.0f, 1.0f, 1.0f);
+
     glPushMatrix();
 
     if (n_ancestors == NULL)
@@ -210,8 +228,22 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
         p->position[2]
     );
 
+    if (p->hasTexture)
+    {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, p->texture);
+    }
+
+    glPushMatrix();
+    glRotatef(p->solarTilt - 90.0f, 1.0f, .0f, .0f);
     // Render planet
     gluSphere(p->quad, p->radius, 64, 32);
+    glPopMatrix();
+
+    if (p->hasTexture)
+    {
+        glDisable(GL_TEXTURE_2D);
+    }
 
     // Render planet's nametag
     renderStringInWorld(
@@ -238,11 +270,13 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
     glPopMatrix();
 }
 
-StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
+StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
 {
     StellarObject** destArray;
 
     *arraySize = 0;
+
+    char* json_filename = strCat(2, data_dir, "data.json");
 
     // open the JSON file 
     FILE *fp = fopen(json_filename, "r"); 
@@ -258,7 +292,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
 
     char* buffer = (char *)malloc(JSON_BUFFER_SIZE * sizeof(char));
 
-    size_t len = fread(buffer, 1, JSON_BUFFER_SIZE, fp);
+    size_t len = fread(buffer, sizeof(char), JSON_BUFFER_SIZE, fp);
 
     fclose(fp); 
 
@@ -323,6 +357,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
         cJSON *solar_tilt = cJSON_GetObjectItemCaseSensitive(iterator, "solar_tilt");
         cJSON *color = cJSON_GetObjectItemCaseSensitive(iterator, "color");
 
+
         if (!cJSON_IsString(name) || name->valuestring == NULL)
             errorField = strBuild("name");
 
@@ -343,6 +378,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
 
         if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
             errorField = strBuild("color");
+
 
         if (errorField != NULL)
         {
@@ -403,24 +439,53 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* json_filename)
         cJSON* g = cJSON_GetArrayItem(color, 1);
         cJSON* b = cJSON_GetArrayItem(color, 2);
 
-        destArray[*arraySize] = coloriseStellarObject3ub(
+
+        GLuint textureId;
+
+        char* texture_filename = strCat(3, data_dir, name->valuestring, ".bmp");
+
+        bool has_texture = registerTexture(texture_filename, &textureId);
+
+        // Load Textures
+        if (!has_texture)
+        {
+            fprintf(
+                stderr, 
+                "Warning: Could not load texture for %s; Continuing with `glColor*`", 
+                name->valuestring
+            );
+        }
+
+        free(texture_filename);
+
+        destArray[*arraySize] = (
+
+            coloriseStellarObject3ub(
+
                 initStellarObject(
                     name->valuestring,
                     (float)radius->valuedouble,
                     orbitPeriodRaw,
                     parentRaw,
                     parentDistanceRaw,
-                    (float)solar_tilt->valuedouble
-            ),
-            (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint
+                    (float)solar_tilt->valuedouble,
+                    textureId,
+                    has_texture
+                ),
+
+                (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint
+            )
         );
 
         *arraySize += 1;
     }
 
+
     cJSON_Delete(json);
 
     free(buffer);
+
+    free(json_filename);
 
     return destArray;
 }

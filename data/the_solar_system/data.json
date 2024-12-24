@@ -1,0 +1,144 @@
+{
+    "Astronomical Objects" : [
+
+        {
+            "name" : "The Sun", 
+            "radius" : 0.00465474539672041, 
+            "orbit_period" : null,
+            "parent" : null, 
+            "parent_dist" : null,
+            "solar_tilt" : 0.0,
+            "color" : [255, 77, 0]
+        },
+
+        {
+            "name" : "Mercury", 
+            "radius" : 1.6310392578335008e-05, 
+            "orbit_period" : 87.9691,
+            "parent" : "The Sun", 
+            "parent_dist" : 0.38,
+            "solar_tilt" : -30.0,
+            "color" : [250, 250, 250]
+        },
+
+        {
+            "name" : "Venus", 
+            "radius" : 4.045512126396864e-05, 
+            "orbit_period" : 224.7,
+            "parent" : "The Sun", 
+            "parent_dist" : 0.73,
+            "solar_tilt" : -10.0,
+            "color" : [255, 232, 147]
+        },
+
+        {
+            "name" : "Earth", 
+            "radius" : 4.258750455597227e-05,
+            "orbit_period" : 365.25636,
+            "parent" : "The Sun", 
+            "parent_dist" : 1.0,
+            "solar_tilt" : 10.0,
+            "color" : [0, 0, 255]
+        },
+
+        {
+            "name" : "Moon", 
+            "radius" : 0.0000116312, 
+            "orbit_period" : 27.32,
+            "parent" : "Earth", 
+            "parent_dist" : 0.0025695553,
+            "solar_tilt" : 0.0,
+            "color" : [255, 255, 255]
+        },
+
+        {
+            "name" : "Mars", 
+            "radius" : 2.2660750344490033e-05, 
+            "orbit_period" : 687.0,
+            "parent" : "The Sun", 
+            "parent_dist" : 1.57,
+            "solar_tilt" : 20.0,
+            "color" : [138, 51, 36]
+        },
+
+        {
+            "name" : "Jupiter", 
+            "radius" : 0.00046732617030490934, 
+            "orbit_period" : 4331.0,
+            "parent" : "The Sun", 
+            "parent_dist" : 5.07,
+            "solar_tilt" : 40.0,
+            "color" : [245, 234, 185]
+        },
+
+        {
+            "name" : "Ganymede", 
+            "radius" : 0.0000176079, 
+            "orbit_period" : 7.15,
+            "parent" : "Jupiter", 
+            "parent_dist" : 0.0071552623,
+            "solar_tilt" : 0.0,
+            "color" : [150, 150, 150]
+        },
+
+        {
+            "name" : "Io", 
+            "radius" : 0.0000121766, 
+            "orbit_period" : 1.77,
+            "parent" : "Jupiter", 
+            "parent_dist" : 0.0028188904,
+            "solar_tilt" : 0.0,
+            "color" : [250, 230, 10]
+        },
+
+        {
+            "name" : "Europa", 
+            "radius" : 0.0000104333, 
+            "orbit_period" : 3.55,
+            "parent" : "Jupiter", 
+            "parent_dist" : 0.0044846895,
+            "solar_tilt" : 0.0,
+            "color" : [230, 30, 30]
+        },
+
+        {
+            "name" : "Callisto", 
+            "radius" : 0.0000161119, 
+            "orbit_period" : 16.69,
+            "parent" : "Jupiter", 
+            "parent_dist" : 0.0125850722,
+            "solar_tilt" : 0.0,
+            "color" : [5, 5, 80]
+        },
+
+        {
+            "name" : "Saturn", 
+            "radius" : 0.0003892568773039362, 
+            "orbit_period" : 10747.0,
+            "parent" : "The Sun", 
+            "parent_dist" : 9.64,
+            "solar_tilt" : 80.0,
+            "color" : [245, 234, 185]
+        },
+
+        {
+            "name" : "Uranus", 
+            "radius" : 0.00016953449859497235, 
+            "orbit_period" : 30589.0,
+            "parent" : "The Sun", 
+            "parent_dist" : 19.56,
+            "solar_tilt" : 50.0,
+            "color" : [202, 233, 245]
+        },
+
+        {
+            "name" : "Neptune", 
+            "radius" : 0.0001645879041244937, 
+            "orbit_period" : 59800.0,
+            "parent" : "The Sun", 
+            "parent_dist" : 29.9,
+            "solar_tilt" : -42.0,
+            "color" : [132, 172, 250]
+        }
+    ]
+}

@@ -35,26 +35,6 @@ void renderStringOnScreen(
     glPopAttrib();
 }
 
-void re(float x, float y, void* font, const char* string, const vector3f rgb)
-{
-    glPushAttrib(GL_COLOR_BUFFER_BIT);
-    {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        {
-            glLoadMatrixf(windowMatrix);
-            glDisable(GL_LIGHTING);
-            glColor3f(rgb[0], rgb[1], rgb[2]);
-            glRasterPos2f(x, y);
-
-            glutBitmapString(font, (const unsigned char*)string);
-            glEnable(GL_LIGHTING);
-        }
-        glPopMatrix();
-    }
-    glPopAttrib();
-}
-
 void renderStringInWorld(
     float x, float y, float z, 
     void* font, const char* string, 

@@ -150,7 +150,7 @@ if __name__ == '__main__':
         
         # MS Windows
         if "-build-depend" in argv:
-            
+
             # Compile FreeGLUT library from source
             if not execute_binaries_msvc(
                 sln_dir_abs=f"{os.getcwd()}\\dependencies\\freeglut\\build", 
@@ -158,7 +158,7 @@ if __name__ == '__main__':
             ):
                 print("Compilation of the FreeGLUT library was unsuccessful.\n")
                 exit(1)
-            
+
             # Compile cJSON library from source
             if not execute_binaries_msvc(
                 sln_dir_abs=f"{os.getcwd()}\\dependencies\\cjson\\build", 
@@ -182,13 +182,15 @@ if __name__ == '__main__':
                 exit(1)
 
         if "-run" in argv:
-            
-            constants = f"{os.getcwd()}\\data\\_constants.json"
-            astro_system_json = [x for x in argv if x.startswith("/planets:")]
-            astro_system_json = f"{os.getcwd()}\\data\\{astro_system_json[0].removeprefix('/planets:')}.json"
-            
+
+            constants = f"{os.getcwd()}\\data\\constants.json"
+
+            astro_system_dir = [x for x in argv if x.startswith("/planets:")]
+            astro_system_dir = astro_system_dir[0].removeprefix('/planets:')
+            astro_system_dir = f"{os.getcwd()}\\data\\{astro_system_dir}\\"
+
             subprocess.run(
-                f".\\build\\Release\\solar_system.exe {constants} {astro_system_json}", 
+                f".\\build\\Release\\solar_system.exe {constants} {astro_system_dir}", 
                 check=True
             )
 

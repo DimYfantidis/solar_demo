@@ -77,10 +77,13 @@ int main(int argc, char* argv[])
     }
 
 	glutInit(&argc, argv);
-    initGlobals(argc, argv); 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
 	glutInitWindowSize(1280, 720);
 	window_id = glutCreateWindow("Solar System - exhibition");
+
+    initGlobals(argc, argv); 
+
+    glutReshapeWindow(window_width, window_height);
 
     if (fullscreen_enabled)
         glutFullScreen();
@@ -113,19 +116,6 @@ int main(int argc, char* argv[])
     glutMouseWheelFunc(callbackMouseWheel);
     glutPassiveMotionFunc(callbackPassiveMotion);
 
-
-	// ----------- Window Matrix (BEGIN) ----------- //
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	// Initialization of Window Matrix for on-screen string rendering.
-	glPushMatrix();
-	{
-		gluOrtho2D(0.0, (double)window_width, 0.0, (double)window_height);
-		glGetFloatv(GL_PROJECTION_MATRIX, windowMatrix);
-	}
-	glPopMatrix();
-	// ----------- Window Matrix (BEGIN) ----------- //
 
     {
         Timer* programTimer = initTimer("glutMainLoop");
@@ -201,7 +191,7 @@ void display(void)
 
     static char logBuffer[1024];
 
-    snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", framerate);
+    snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", 1 / elapsed_seconds);
     renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
 
     snprintf(logBuffer, sizeof(logBuffer), "Camera Position: (%.3f, %.3f, %.3f)", camera->position[0], camera->position[1], camera->position[2]);
@@ -209,6 +199,9 @@ void display(void)
 
     snprintf(logBuffer, sizeof(logBuffer), "Simulation Speed: %.4f", simulationSpeed);
     renderStringOnScreen(0.0, window_height - 45.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+    snprintf(logBuffer, sizeof(logBuffer), "Camera Speed: %.4f", camera->movementSpeed);
+    renderStringOnScreen(0.0, window_height - 60.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -331,12 +324,26 @@ void initGlobals(int argc, char* argv[])
     // ----------- Stellar Objects (END) ----------- //
     
 
+    // ----------- Window Matrix (BEGIN) ----------- //
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	// Initialization of Window Matrix for on-screen string rendering.
+	glPushMatrix();
+	{
+		gluOrtho2D(0.0, (double)window_width, 0.0, (double)window_height);
+		glGetFloatv(GL_PROJECTION_MATRIX, windowMatrix);
+	}
+	glPopMatrix();
+	// ----------- Window Matrix (BEGIN) ----------- //
+
+
     mainMenuScreen = initMenuScreen(
         camera,
         4,
-        "Goofy",
-        "Goofy 2",
-        "kati tetoia",
+        "Option 1",
+        "Option 2",
+        "Option 3",
         "Exit"
     );
     setMenuScreenBoxDimensions(mainMenuScreen, 0.12f, 0.04f);
