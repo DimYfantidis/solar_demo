@@ -74,4 +74,34 @@ void endTimer(Timer* timer)
     free(timer);
 }
 
+void getTimeFormatStringFromMillis(char* buffer, size_t buffer_size, uint64_t duration_ms)
+{
+    uint64_t duration_sec;
+    uint64_t duration_min;
+    uint64_t duration_h;
+    uint64_t duration_days;
+    uint64_t duration_months;
+    uint64_t duration_years;
+
+    duration_sec = duration_ms / 1000;
+    duration_ms = duration_ms % 1000;
+
+    duration_min = duration_sec / 60;
+    duration_sec = duration_sec % 60;
+
+    duration_h = duration_min / 60;
+    duration_min = duration_min % 60;
+    
+    duration_days = duration_h / 24;
+    duration_h = duration_h % 24;
+
+    duration_years = duration_days / 365;
+    duration_days = duration_days % 365;
+
+    snprintf(
+        buffer, buffer_size, "(%lluY: %03lluD : %02lluh : %02llumin : %02llusec : %03llums)",
+        duration_years, duration_days, duration_h, duration_min, duration_sec, duration_ms
+    );
+}
+
 #endif // TIMER_H

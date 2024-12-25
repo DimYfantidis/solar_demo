@@ -40,12 +40,16 @@ typedef struct StellarObject
     // The trajectory's angle relevant to the parent's coordinate system.
     float solarTilt;
 
+    float selfAngularVelocity;
+
+    float selfParametricAngle;
+
     vector3ub color;
+
+    bool hasTexture;
 
     // The body's OpenGL texture ID
     GLuint texture; 
-
-    bool hasTexture;
 
 } StellarObject;
 
@@ -58,7 +62,8 @@ StellarObject* initStellarObject(
     float parent_dist,
     float solar_tilt,
     GLuint texture,
-    bool hasTexture
+    bool has_texture,
+    float day_period
 ) 
 {
 #ifdef PROJ_DEBUG
@@ -72,10 +77,12 @@ StellarObject* initStellarObject(
     p->solarTilt = solar_tilt;
     p->quad = gluNewQuadric();
     p->parametricAngle = (float)(-M_PI);
+    p->selfParametricAngle = (float)(-M_PI);
     p->parentDistance = AUtoR(parent_dist);
     p->orbitalPeriod = orbit_period;
     p->texture = texture;
-    p->hasTexture = hasTexture;
+    p->hasTexture = has_texture;
+    p->selfAngularVelocity = 1.0f / day_period;
 
     if (p->orbitalPeriod == .0f)
     {
@@ -94,7 +101,7 @@ StellarObject* initStellarObject(
     memset(p->position, (int).0f, sizeof(p->position));
     memset(p->color, (int)0xFF, sizeof(p->color));
 
-    if (hasTexture)
+    if (has_texture)
         gluQuadricTexture(p->quad, GL_TRUE);
 
     gluQuadricDrawStyle(p->quad, GLU_FILL);
@@ -135,19 +142,20 @@ void deleteStellarObject(StellarObject* p)
     }
 }
 
-void updateStellarObject(StellarObject* p, float speed_factor)
+void updateStellarObject(StellarObject* p, float speed_factor, float dt)
 {
-    p->parametricAngle += speed_factor * p->angularVelocity;
+    p->parametricAngle += speed_factor * p->angularVelocity * dt;
+    p->selfParametricAngle += speed_factor * p->selfAngularVelocity * dt;
 
     if (p->parametricAngle > (float)M_PI) {
-        p->parametricAngle -= (float)(2 * M_PI);
+        p->parametricAngle -= (float)(2. * M_PI);
+    }
+    if (p->selfParametricAngle > (float)M_PI) {
+        p->selfParametricAngle -= (float)(2. * M_PI);
     }
 
-    float sin_ang = sinf(p->parametricAngle);
-    float cos_ang = cosf(p->parametricAngle);
-
-    p->position[0] = cos_ang * p->parentDistance;
-    p->position[2] = sin_ang * p->parentDistance;
+    p->position[0] = cosf(p->parametricAngle) * p->parentDistance;
+    p->position[2] = sinf(p->parametricAngle) * p->parentDistance;
 }
 
 // Returns an array of the body's system centre of rotation, along with 
@@ -241,9 +249,13 @@ void renderStellarObject(
     }
 
     glPushMatrix();
+
     glRotatef(p->solarTilt - 90.0f, 1.0f, .0f, .0f);
-    // Render planet
+    // Animation for rotation around axis.
+    glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
+    // Render planet.
     gluSphere(p->quad, p->radius, 64, 32);
+        
     glPopMatrix();
 
     if (p->hasTexture)
@@ -375,6 +387,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
         cJSON *parent_dist = cJSON_GetObjectItemCaseSensitive(iterator, "parent_dist");
         cJSON *solar_tilt = cJSON_GetObjectItemCaseSensitive(iterator, "solar_tilt");
         cJSON *color = cJSON_GetObjectItemCaseSensitive(iterator, "color");
+        cJSON *day_period = cJSON_GetObjectItemCaseSensitive(iterator, "day_period");
 
 
         if (!cJSON_IsString(name) || name->valuestring == NULL)
@@ -397,6 +410,9 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
 
         if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
             errorField = strBuild("color");
+
+        if (!cJSON_IsNumber(day_period))
+            errorField = strBuild("day_period");
 
 
         if (errorField != NULL)
@@ -489,7 +505,8 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
                     parentDistanceRaw,
                     (float)solar_tilt->valuedouble,
                     textureId,
-                    has_texture
+                    has_texture,
+                    (float)day_period->valuedouble
                 ),
 
                 (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint

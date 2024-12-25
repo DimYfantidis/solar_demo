@@ -100,15 +100,14 @@ ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned 
 
     ubyte* image = (ubyte *)malloc((*width) * (*height) * 3 * sizeof(ubyte));
 
-    size_t rowOffset = 3 * (*width); 
-    size_t offset;
-
     // Reading the pixels of input image
     for (y = 0; y < *height; y++)
     {
+        size_t rowOffset = 3 * (*width) * y; 
+
         for (x = 0; x < *width; x++)
         {
-            offset = rowOffset * y + 3 * x;
+            register size_t offset = rowOffset + 3 * x;
 
             image[offset + 2] = fgetc(fp);
             image[offset + 1] = fgetc(fp);

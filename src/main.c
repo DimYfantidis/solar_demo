@@ -10,6 +10,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -59,6 +60,9 @@ AmbientStars* starsSkyBox;
 
 MenuScreen* mainMenuScreen;
 MenuScreen* planetMenuScreen;
+
+uint64_t simulationElapsedTimeMilliseconds;
+uint64_t realElapsedTimeMilliseconds;
 
 
 void initGlobals(int, char**);
@@ -184,7 +188,7 @@ void display(void)
     {
         // Update celestial body's position after moving 
         // by v * dt, where v is its linear velocity.
-        updateStellarObject(stellarObjects[i], simulationSpeed);
+        updateStellarObject(stellarObjects[i], simulationSpeed, elapsed_seconds / 3600.0);
         // Render the body as well as its trajectory.
         renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
     }
@@ -194,7 +198,13 @@ void display(void)
     renderStars(starsSkyBox);
 
 
+    static char timeFormatBuffer[1024];
+
+    simulationElapsedTimeMilliseconds += (uint64_t)(elapsed_seconds * simulationSpeed * 1000);
+    realElapsedTimeMilliseconds += (uint64_t)(elapsed_seconds * 1000);
+
     static char logBuffer[1024];
+
 
     snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", 1 / elapsed_seconds);
     renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
@@ -207,6 +217,15 @@ void display(void)
 
     snprintf(logBuffer, sizeof(logBuffer), "Camera Speed: %.4f", camera->movementSpeed);
     renderStringOnScreen(0.0, window_height - 60.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+    getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), realElapsedTimeMilliseconds);
+    snprintf(logBuffer, sizeof(logBuffer), "Elapsed Real time:    %s", timeFormatBuffer);
+    renderStringOnScreen(0.0, window_height - 90.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+    getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), simulationElapsedTimeMilliseconds);
+    snprintf(logBuffer, sizeof(logBuffer), "Elapsed Virtual time: %s", timeFormatBuffer);
+    renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+ 
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -221,6 +240,9 @@ void initGlobals(int argc, char* argv[])
     window_width = 1280;
     window_height = 720;
     framerate = 60.0;
+
+    simulationElapsedTimeMilliseconds = 0;
+    realElapsedTimeMilliseconds = 0;
 
     // open the _constants.json file 
     FILE *fp = fopen(argv[1], "r"); 
