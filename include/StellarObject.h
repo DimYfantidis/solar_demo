@@ -92,7 +92,7 @@ StellarObject* initStellarObject(
     }
 
     memset(p->position, (int).0f, sizeof(p->position));
-    memset(p->position, (int)0x00, sizeof(p->position));
+    memset(p->color, (int)0xFF, sizeof(p->color));
 
     if (hasTexture)
         gluQuadricTexture(p->quad, GL_TRUE);
@@ -113,10 +113,13 @@ StellarObject* coloriseStellarObject3f(StellarObject* p, float red, float green,
 
 StellarObject* coloriseStellarObject3ub(StellarObject* p, ubyte red, ubyte green, ubyte blue)
 {
-    p->color[0] = red;
-    p->color[1] = green;
-    p->color[2] = blue;
-
+    // Textured astronomical objects must be white so that their texture gets rendered properly.
+    if (!p->hasTexture)
+    {
+        p->color[0] = red;
+        p->color[1] = green;
+        p->color[2] = blue;
+    }
     return p;
 }
 
@@ -181,17 +184,20 @@ StellarObject** getStellarObjectAncestors(StellarObject* p, int* n_ancestors)
     return ancestors;
 }
 
-void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject** ancestors, int* n_ancestors)
+void renderStellarObject(
+    StellarObject* p, 
+    bool render_trajectory, 
+    unsigned int trajectory_list, 
+    StellarObject** ancestors, 
+    int* n_ancestors
+)
 {
     bool usesCachedAncestors = (ancestors == NULL ? false : true);
 
     int tmp_n_ancestors;
 
 
-    if (!p->hasTexture)
-        glColor3ubv(p->color);
-    else
-        glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3ubv(p->color);
 
     glPushMatrix();
 
@@ -260,14 +266,27 @@ void renderStellarObject(StellarObject* p, bool render_trajectory, StellarObject
 
         glScalef(p->parentDistance, p->parentDistance, p->parentDistance);
 
+        glCallList(trajectory_list);
+    }
+    glPopMatrix();
+}
+
+unsigned int generateStellarObjectTrajectoryDisplayList()
+{
+    unsigned int listId = glGenLists(1);
+
+    glNewList(listId, GL_COMPILE);
+    {
         glBegin(GL_LINE_LOOP);
-        for (float theta = (float)(-M_PI); theta < (float)M_PI; theta += (float)M_PI / 100.0f) 
         {
-            glVertex3f(cosf(theta), .0f, sinf(theta));
+            for (float theta = (float)(-M_PI); theta < (float)M_PI; theta += (float)M_PI / 3000.0f)
+                glVertex3f(cosf(theta), .0f, sinf(theta));
         }
         glEnd();
     }
-    glPopMatrix();
+    glEndList();
+
+    return listId;
 }
 
 StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)

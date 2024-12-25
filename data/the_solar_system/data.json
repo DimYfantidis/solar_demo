@@ -77,7 +77,7 @@
             "orbit_period" : 7.15,
             "parent" : "Jupiter", 
             "parent_dist" : 0.0071552623,
-            "solar_tilt" : 0.0,
+            "solar_tilt" : -50.0,
             "color" : [150, 150, 150]
         },
 
@@ -87,7 +87,7 @@
             "orbit_period" : 1.77,
             "parent" : "Jupiter", 
             "parent_dist" : 0.0028188904,
-            "solar_tilt" : 0.0,
+            "solar_tilt" : 20.0,
             "color" : [250, 230, 10]
         },
 
@@ -97,7 +97,7 @@
             "orbit_period" : 3.55,
             "parent" : "Jupiter", 
             "parent_dist" : 0.0044846895,
-            "solar_tilt" : 0.0,
+            "solar_tilt" : -20.0,
             "color" : [230, 30, 30]
         },
 
@@ -107,7 +107,7 @@
             "orbit_period" : 16.69,
             "parent" : "Jupiter", 
             "parent_dist" : 0.0125850722,
-            "solar_tilt" : 0.0,
+            "solar_tilt" : 50.0,
             "color" : [5, 5, 80]
         },
 

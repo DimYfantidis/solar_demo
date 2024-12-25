@@ -11,7 +11,7 @@
 
 
 // bmp file header 
-typedef struct tagBitmapFileHeader {
+struct tagBitmapFileHeader {
 
 #ifdef _MSC_VER
     #pragma pack(push, 1)
@@ -36,7 +36,7 @@ typedef struct tagBitmapFileHeader {
 ;
 
 // bmp extra file header
-typedef struct tagBitmapInfoHeader {
+struct tagBitmapInfoHeader {
     
 #ifdef _MSC_VER
     #pragma pack(push, 1)
@@ -100,14 +100,19 @@ ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned 
 
     ubyte* image = (ubyte *)malloc((*width) * (*height) * 3 * sizeof(ubyte));
 
+    size_t rowOffset = 3 * (*width); 
+    size_t offset;
+
     // Reading the pixels of input image
     for (y = 0; y < *height; y++)
     {
         for (x = 0; x < *width; x++)
         {
-            image[3 * (*width) * y + 3 * x + 2] = fgetc(fp);
-            image[3 * (*width) * y + 3 * x + 1] = fgetc(fp);
-            image[3 * (*width) * y + 3 * x + 0] = fgetc(fp);
+            offset = rowOffset * y + 3 * x;
+
+            image[offset + 2] = fgetc(fp);
+            image[offset + 1] = fgetc(fp);
+            image[offset + 0] = fgetc(fp);
         }
     }
     

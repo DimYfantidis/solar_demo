@@ -43,7 +43,11 @@ clock_t refresh_ts;
 
 
 StellarObject** stellarObjects;
+
 int numStellarObjects;
+
+unsigned int trajectoryListId; 
+
 
 StellarObject*** cachedAncestors;
 int* numCachedAncestors;
@@ -94,7 +98,9 @@ int main(int argc, char* argv[])
         0.0803921568627451f / 3, 
         1.0f
     );
+
 	glEnable(GL_DEPTH_TEST);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
@@ -106,7 +112,6 @@ int main(int argc, char* argv[])
     // Initialise the callback function's static variables with the provided arguments.
     callbackPassiveMotion(windowCentreX, windowCentreY);
     callbackPassiveMotion(windowCentreX, windowCentreY);
-    
 
     glutDisplayFunc(display);
     glutKeyboardFunc(callbackKeyboard);
@@ -181,7 +186,7 @@ void display(void)
         // by v * dt, where v is its linear velocity.
         updateStellarObject(stellarObjects[i], simulationSpeed);
         // Render the body as well as its trajectory.
-        renderStellarObject(stellarObjects[i], true, cachedAncestors[i], &numCachedAncestors[i]);
+        renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
     }
 
     // renderMenuScreen(planetMenuScreen);
@@ -321,6 +326,9 @@ void initGlobals(int argc, char* argv[])
         cachedAncestors[i] = getStellarObjectAncestors(stellarObjects[i], &numCachedAncestors[i]);
         // printf("%s -> cached: %d\n", stellarObjects[i]->name, numCachedAncestors[i]);
     }
+
+    trajectoryListId = generateStellarObjectTrajectoryDisplayList();
+
     // ----------- Stellar Objects (END) ----------- //
     
 
