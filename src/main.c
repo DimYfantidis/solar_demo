@@ -192,7 +192,7 @@ void display(void)
     {
         // Update celestial body's position after moving 
         // by v * dt, where v is its linear velocity.
-        updateStellarObject(stellarObjects[i], simulationSpeed, elapsed_seconds / 3600.0f);
+        updateStellarObject(stellarObjects[i], simulationSpeed, (float)elapsed_seconds / 3600.0f);
         // Render the body as well as its trajectory.
         renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
     }

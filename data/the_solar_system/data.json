@@ -85,7 +85,7 @@
             "parent" : "Jupiter", 
             "parent_dist" : 0.0071552623,
             "solar_tilt" : -50.0,
-            "day_period" : 0.0,
+            "day_period" : 1.0,
             "color" : [150, 150, 150]
         },
 
@@ -96,7 +96,7 @@
             "parent" : "Jupiter", 
             "parent_dist" : 0.0028188904,
             "solar_tilt" : 20.0,
-            "day_period" : 0.0,
+            "day_period" : 1.0,
             "color" : [250, 230, 10]
         },
 
@@ -107,7 +107,7 @@
             "parent" : "Jupiter", 
             "parent_dist" : 0.0044846895,
             "solar_tilt" : -20.0,
-            "day_period" : 0.0,
+            "day_period" : 1.0,
             "color" : [230, 30, 30]
         },
 
@@ -118,7 +118,7 @@
             "parent" : "Jupiter", 
             "parent_dist" : 0.0125850722,
             "solar_tilt" : 50.0,
-            "day_period" : 0.0,
+            "day_period" : 1.0,
             "color" : [5, 5, 80]
         },
 

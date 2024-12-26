@@ -252,7 +252,8 @@ void renderStellarObject(
 
     glRotatef(p->solarTilt - 90.0f, 1.0f, .0f, .0f);
     // Animation for rotation around axis.
-    glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
+    if (p->hasTexture)
+        glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
     // Render planet.
     gluSphere(p->quad, p->radius, 64, 32);
 
@@ -486,7 +487,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
         {
             fprintf(
                 stderr, 
-                "Warning: Could not load texture for %s; Continuing with `glColor*`", 
+                "Warning: Could not load texture for %s; Continuing with `glColor*`.\n", 
                 name->valuestring
             );
         }

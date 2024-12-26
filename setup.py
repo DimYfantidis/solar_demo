@@ -11,7 +11,7 @@ import numpy as np
 
 
 HELP_MESSAGE = """
------------------------------------------------- < Script Arguments > ------------------------------------------------
+< ---------------------------------------------- < Script Arguments > ---------------------------------------------- >
 
     * -build-depend: Compiles the dependencies to produce the resulting *.dll and *.lib files. 
                      Should only be used once when seting up the project but can be ommited later.
@@ -32,14 +32,14 @@ HELP_MESSAGE = """
 
 def onerror_handler(func, path: str, exc_info):
     """
-    Error handler for ``shutil.rmtree``.
+    Error handler for `shutil.rmtree`.
 
     If the error is due to an access error (read only file)
     it attempts to add write permission and then retries.
 
     If the error is for another reason it re-raises the error.
     
-    Usage : ``shutil.rmtree(path, onerror=onerror)``
+    Usage : `shutil.rmtree(path, onerror=onerror)`
     """
     # Is the error an access error?
     if not os.access(path, os.W_OK):
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     if "-help" in argv:
         print(HELP_MESSAGE)
         exit(0)
-        
+
     if "-clear" in argv or "-cleanse" in argv:
         
         # Clears the project's cache
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
         # Exit gracefully
         exit()
-    
+
     
     astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir(f"./data/{x}")]
     
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     print(f"Operating System family: {system_platform}")
 
     if system_platform == "Windows":
-        
+
         # MS Windows
         if "-build-depend" in argv:
 
@@ -225,7 +225,8 @@ if __name__ == '__main__':
                 exit(1)
 
         if "-run" in argv:
-
+            
+            # Load the program's user preferences.
             constants = f"{os.getcwd()}\\data\\constants.json"
 
             astro_system_dir = [x for x in argv if x.startswith("/planets:")]

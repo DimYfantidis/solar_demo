@@ -120,10 +120,10 @@ void deleteStars(AmbientStars* stars)
 
 void renderStars(AmbientStars* stars)
 {
-    glColor3f(1.0f, 1.0f, 1.0f);
-
     if (stars->positions != NULL)
     {
+        glColor3f(1.0f, 1.0f, 1.0f);
+
         // Low Resolution Sky rendering.
         for (int i = 0; i < stars->numberOfStars; ++i)
         {
@@ -147,7 +147,9 @@ void renderStars(AmbientStars* stars)
         }
     }
     else
-    {
+    {   
+        glColor3f(0.3f, 0.3f, 0.3f);
+
         // High Resolution Sky rendering.
         glPushMatrix();
 
@@ -160,7 +162,7 @@ void renderStars(AmbientStars* stars)
             stars->POVanchor->position[2]
         );
 
-        glRotatef(100.0, 0.957826f, -0.287348f, 0.0f);
+        glRotatef(100.0f, 0.957826f, -0.287348f, 0.0f);
 
         gluSphere(
             stars->quads[0], 

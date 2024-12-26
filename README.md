@@ -1,11 +1,12 @@
 # OpenGL implementation of the Solar System
 
 ## Preface
+
 3D simulation of the Copernican astronomical model. The radii and distances of astronomical objects are to scale. Implemented using Python3, C, FreeGLUT and cJSON.
 
 <p align="middle">
-    <img src="./media/exhibition.gif" alt="Solar System Exhibition GIF" width="370">
-    <img src="./media/exhibition2.gif" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/exhibition.gif" alt="Solar System Exhibition GIF 1" width="370">
+    <img src="./media/exhibition2.gif" alt="Solar System Exhibition GIF 2" width="370">
     <br>
     <i> Previews of the rendered scene as the camera slowly moves away and the Sun's rotation. </i>
 </p>
@@ -13,11 +14,11 @@
 <br>
 
 <p align="middle">
-    <img src="./media/earth_shot.PNG" alt="Solar System Exhibition GIF" width="370">
-    <img src="./media/moon_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/earth_shot.PNG" alt="Simulated Earth Screenshot JPEG" width="370">
+    <img src="./media/moon_shot.PNG" alt="Simulated Moon Screenshot JPEG" width="370">
     <br>
-    <img src="./media/jupiter_shot.PNG" alt="Solar System Exhibition GIF" width="370">
-    <img src="./media/neptune_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/jupiter_shot.PNG" alt="Simulated Jupiter Screenshot JPEG" width="370">
+    <img src="./media/neptune_shot.PNG" alt="Simulated Neptune Screenshot JPEG" width="370">
     <br>
     <i> Sample screenshots from the Simulation; Many thanks to <a href="https://www.solarsystemscope.com/textures/">Solar System Scope</a> for the textures.</i>
 </p>
@@ -77,15 +78,19 @@ This project demands the existence of a base **Python3** interpeter, **CMake ver
 
 ---
 
-
-## Setup 
+## Setup
 
 1. Clone the repository:
     ```
     git clone https://github.com/DimYfantidis/my_solar_system.git
     ```
 
-2. Within the repo's directory, paste the command:
+2. Check for and install any missing Python module dependencies:
+    ```
+    pip install --exists-action=i -r pydepend.txt
+    ```
+
+3. Within the repo's directory, paste the command:
     ``` 
     python setup.py -build-depend -build-proj -run /planets:the_solar_system
     ```

@@ -80,7 +80,6 @@ void getTimeFormatStringFromMillis(char* buffer, size_t buffer_size, uint64_t du
     uint64_t duration_min;
     uint64_t duration_h;
     uint64_t duration_days;
-    uint64_t duration_months;
     uint64_t duration_years;
 
     duration_sec = duration_ms / 1000;
