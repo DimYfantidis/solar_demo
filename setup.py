@@ -139,15 +139,11 @@ if __name__ == '__main__':
         
         jpegTextureFiles = [x for x in os.listdir(f"./data/{astro_dir}") if x.endswith(".jpg")]
         
-        print(jpegTextureFiles)
-        
         for stellarObjectJpeg in jpegTextureFiles:
             
             obj_name = stellarObjectJpeg.removesuffix('.jpg')
             input_path = f"./data/{astro_dir}/{obj_name}.jpg"
             output_path = f"./data/{astro_dir}/{obj_name}.bmp"
-            
-            print(input_path)
             
             if os.path.exists(output_path):
                 # Texture has already been converted from JPEG to BMP.

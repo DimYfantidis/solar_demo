@@ -89,7 +89,7 @@ AmbientStars* buildStarsFromTexture(const char* data_dir, Camera* POVanchor)
     stars->quads[0] = gluNewQuadric();
     gluQuadricTexture(stars->quads[0], GL_TRUE);
 
-    char* texture_filename = strCat(2, data_dir, "stars.bmp");
+    char* texture_filename = strCat(2, data_dir, "SKYBOX.bmp");
 
     if (!registerTexture(texture_filename, &stars->texture))
     {

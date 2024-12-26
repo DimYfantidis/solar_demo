@@ -1,10 +1,10 @@
 {
     "window_dimensions" : {
-        "width" : 1280,
-        "height" : 720
+        "width" : 2560,
+        "height" : 1440
     },
 
-    "fullscreen" : false,
+    "fullscreen" : true,
     
     "sky_texture" : true,
 
