@@ -10,6 +10,16 @@
     <i> Previews of the rendered scene as the camera slowly moves away and the Sun's rotation. </i>
 </p>
 
+<p align="middle">
+    <img src="./media/earth_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/moon_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <br>
+    <img src="./media/jupiter_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/neptune_shot.PNG" alt="Solar System Exhibition GIF" width="370">
+    <br>
+    <i> Sample screenshots from the Simulation. </i>
+</p>
+
 <br>
 
 ---
