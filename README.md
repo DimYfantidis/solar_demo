@@ -4,8 +4,9 @@
 3D simulation of the Copernican astronomical model. The radii and distances of astronomical objects are to scale. Implemented using Python3, C, FreeGLUT and cJSON.
 
 <p align="middle">
-  <img src="./media/exhibition.gif" alt="Solar System Exhibition GIF" width="350">
-  <img src="./media/exhibition2.gif" alt="Solar System Exhibition GIF" width="350">
+    <img src="./media/exhibition.gif" alt="Solar System Exhibition GIF" width="370">
+    <img src="./media/exhibition2.gif" alt="Solar System Exhibition GIF" width="370">
+    <br>
     <i> Previews of the rendered scene as the camera slowly moves away and the Sun's rotation. </i>
 </p>
 
