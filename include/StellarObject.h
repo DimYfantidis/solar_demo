@@ -252,8 +252,7 @@ void renderStellarObject(
 
     glRotatef(p->solarTilt - 90.0f, 1.0f, .0f, .0f);
     // Animation for rotation around axis.
-    if (p->hasTexture)
-        glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
+    glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
     // Render planet.
     gluSphere(p->quad, p->radius, 64, 32);
 
