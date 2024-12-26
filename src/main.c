@@ -56,7 +56,11 @@ int* numCachedAncestors;
 
 Camera* camera;
 
+
 AmbientStars* starsSkyBox;
+
+bool skyTexture;
+
 
 MenuScreen* mainMenuScreen;
 MenuScreen* planetMenuScreen;
@@ -188,7 +192,7 @@ void display(void)
     {
         // Update celestial body's position after moving 
         // by v * dt, where v is its linear velocity.
-        updateStellarObject(stellarObjects[i], simulationSpeed, elapsed_seconds / 3600.0);
+        updateStellarObject(stellarObjects[i], simulationSpeed, elapsed_seconds / 3600.0f);
         // Render the body as well as its trajectory.
         renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
     }
@@ -244,6 +248,8 @@ void initGlobals(int argc, char* argv[])
     simulationElapsedTimeMilliseconds = 0;
     realElapsedTimeMilliseconds = 0;
 
+    skyTexture = false;
+
     // open the _constants.json file 
     FILE *fp = fopen(argv[1], "r"); 
 
@@ -298,6 +304,12 @@ void initGlobals(int argc, char* argv[])
     cJSON *fps = cJSON_GetObjectItemCaseSensitive(json, "framerate"); 
     if (cJSON_IsNumber(fps))
         framerate = fps->valuedouble;
+
+    
+    cJSON *sky_texture = cJSON_GetObjectItemCaseSensitive(json, "sky_texture"); 
+    if (cJSON_IsBool(sky_texture))
+        skyTexture = (bool)sky_texture->valueint;
+
 
     // delete the JSON object 
     cJSON_Delete(json); 
@@ -385,7 +397,10 @@ void initGlobals(int argc, char* argv[])
     }
     setMenuScreenBoxDimensions(planetMenuScreen, 0.07f, 0.03f);
 
-    starsSkyBox = buildStars(1000, camera);
+    if (skyTexture)
+        starsSkyBox = buildStarsFromTexture(argv[2], camera);
+    else
+        starsSkyBox = buildStars(1000, camera);
 }
 
 // Free all dynamically allocated memory and FreeGLUT's resources.

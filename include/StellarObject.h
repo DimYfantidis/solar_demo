@@ -137,7 +137,7 @@ void deleteStellarObject(StellarObject* p)
     {
         gluDeleteQuadric(p->quad);
         free(p->name);
-        // glDeleteTextures(1, &p->texture);
+        glDeleteTextures(1, &p->texture);
         free(p);
     }
 }
@@ -255,7 +255,7 @@ void renderStellarObject(
     glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
     // Render planet.
     gluSphere(p->quad, p->radius, 64, 32);
-        
+
     glPopMatrix();
 
     if (p->hasTexture)

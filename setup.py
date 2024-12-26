@@ -1,13 +1,18 @@
 from sys import argv
 from platform import system as pl_system
+from PIL import Image
+
 
 import os
 import stat
 import shutil
 import subprocess
+import numpy as np
 
 
 HELP_MESSAGE = """
+------------------------------------------------ < Script Arguments > ------------------------------------------------
+
     * -build-depend: Compiles the dependencies to produce the resulting *.dll and *.lib files. 
                      Should only be used once when seting up the project but can be ommited later.
                      Can be used independently of -build-proj and -run.
@@ -87,7 +92,7 @@ def setup_dependency(
 
         # Build dependency from source
         subprocess.run(f"cmake ..", cwd=f"./dependencies/{dep_name}/build", check=True)
-        
+
     except subprocess.CalledProcessError as e:
         print(e)
         return False
@@ -112,9 +117,51 @@ if __name__ == '__main__':
 
         if os.path.exists("./build"):
             shutil.rmtree("./build", onerror=onerror_handler)
+            
+        if os.path.exists("./data"):
+            
+            astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir(f"./data/{x}")]
+            
+            for astro_dir in astro_system_dirs:
+                
+                bitmapTextureFiles = [x for x in os.listdir(f"./data/{astro_dir}") if x.endswith(".bmp")]
+                
+                for stellarObjectBitamp in bitmapTextureFiles:
+                    os.remove(f"./data/{astro_dir}/{stellarObjectBitamp}")
 
         # Exit gracefully
         exit()
+    
+    
+    astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir(f"./data/{x}")]
+    
+    for astro_dir in astro_system_dirs:
+        
+        jpegTextureFiles = [x for x in os.listdir(f"./data/{astro_dir}") if x.endswith(".jpg")]
+        
+        print(jpegTextureFiles)
+        
+        for stellarObjectJpeg in jpegTextureFiles:
+            
+            obj_name = stellarObjectJpeg.removesuffix('.jpg')
+            input_path = f"./data/{astro_dir}/{obj_name}.jpg"
+            output_path = f"./data/{astro_dir}/{obj_name}.bmp"
+            
+            print(input_path)
+            
+            if os.path.exists(output_path):
+                # Texture has already been converted from JPEG to BMP.
+                continue
+            
+            try:
+                print(f"Converting {obj_name}'s texture from JPEG to Bitmap...")
+                
+                with Image.open(input_path) as img:
+                    img.save(output_path, format="BMP")
+                    
+            except Exception as e:
+                print(f"An error occurred while converting {stellarObjectJpeg} to bitmap: {e}")
+
     
     if not os.path.exists("./dependencies"):
         os.mkdir("./dependencies")
