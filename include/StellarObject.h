@@ -21,28 +21,30 @@ typedef struct StellarObject
     // The centre of the body's rotation.
     struct StellarObject* parent;
 
-    vector3f position;
+    vector2r parametricPosition;
 
-    float radius;
+    vector3r apparentPosition;
+
+    real_t radius;
 
     // The body's linear velocity along its trajectory in rad/h.
-    float angularVelocity;
+    real_t angularVelocity;
 
     // The time period in which the body completes its orbit in solar days.
-    float orbitalPeriod;
+    real_t orbitalPeriod;
 
     // Value of the body's parametric equation of its trajectory. 
-    float parametricAngle;
+    real_t parametricAngle;
 
     // Distance from the body's centre of rotation, i.e. its trajectory's radius in AU.
-    float parentDistance;
+    real_t parentDistance;
 
     // The trajectory's angle relevant to the parent's coordinate system.
-    float solarTilt;
+    real_t solarTilt;
 
-    float selfAngularVelocity;
+    real_t selfAngularVelocity;
 
-    float selfParametricAngle;
+    real_t selfParametricAngle;
 
     vector3ub color;
 
@@ -56,14 +58,14 @@ typedef struct StellarObject
 
 StellarObject* initStellarObject(
     const char* name, 
-    float radius, 
-    float orbit_period,
+    real_t radius, 
+    real_t orbit_period,
     StellarObject* parent, 
-    float parent_dist,
-    float solar_tilt,
+    real_t parent_dist,
+    real_t solar_tilt,
     GLuint texture,
     bool has_texture,
-    float day_period
+    real_t day_period
 ) 
 {
 #ifdef PROJ_DEBUG
@@ -76,30 +78,31 @@ StellarObject* initStellarObject(
     p->parent = parent;
     p->solarTilt = solar_tilt;
     p->quad = gluNewQuadric();
-    p->parametricAngle = (float)(-M_PI);
-    p->selfParametricAngle = (float)(-M_PI);
+    p->parametricAngle = -M_PI;
+    p->selfParametricAngle = -M_PI;
     p->parentDistance = AUtoR(parent_dist);
     p->orbitalPeriod = orbit_period;
     p->texture = texture;
     p->hasTexture = has_texture;
-    p->selfAngularVelocity = 1.0f / day_period;
+    p->selfAngularVelocity = (real_t)1.0 / day_period;
 
-    if (p->orbitalPeriod == .0f)
+    if (p->orbitalPeriod == (real_t).0)
     {
         fprintf(
             stderr, 
             "Warning: %s's orbitalPeriod was declared 0 - Proceeding with 0 angular velocity; Was this intentional?\n", 
             name
         );
-        p->angularVelocity = .0f;
+        p->angularVelocity = (real_t).0;
     }
     else
     {
-        p->angularVelocity = (float)(2.0 * M_PI / ((double)orbit_period * 24.0));
+        p->angularVelocity = (real_t)(2.0 * M_PI / ((double)orbit_period * 24.0));
     }
 
-    memset(p->position, (int).0f, sizeof(p->position));
     memset(p->color, (int)0xFF, sizeof(p->color));
+    memset(p->apparentPosition, (int).0, sizeof(p->apparentPosition));
+    memset(p->parametricPosition, (int).0, sizeof(p->parametricPosition));
 
     if (has_texture)
         gluQuadricTexture(p->quad, GL_TRUE);
@@ -130,7 +133,6 @@ StellarObject* coloriseStellarObject3ub(StellarObject* p, ubyte red, ubyte green
     return p;
 }
 
-
 void deleteStellarObject(StellarObject* p)
 {
     if (p != NULL)
@@ -142,20 +144,34 @@ void deleteStellarObject(StellarObject* p)
     }
 }
 
-void updateStellarObject(StellarObject* p, float speed_factor, float dt)
+void updateStellarObject(StellarObject* p, real_t speed_factor, real_t dt)
 {
     p->parametricAngle += speed_factor * p->angularVelocity * dt;
     p->selfParametricAngle += speed_factor * p->selfAngularVelocity * dt;
 
-    if (p->parametricAngle > (float)M_PI) {
-        p->parametricAngle -= (float)(2. * M_PI);
+    if (p->parametricAngle >= (real_t)M_PI) {
+        p->parametricAngle -= (real_t)(2. * M_PI);
     }
-    if (p->selfParametricAngle > (float)M_PI) {
-        p->selfParametricAngle -= (float)(2. * M_PI);
+    if (p->selfParametricAngle >= (real_t)M_PI) {
+        p->selfParametricAngle -= (real_t)(2. * M_PI);
     }
 
-    p->position[0] = cosf(p->parametricAngle) * p->parentDistance;
-    p->position[2] = sinf(p->parametricAngle) * p->parentDistance;
+    // Parametric position along its 2D (circular) trajectory.
+    p->parametricPosition[0] = (real_t)(cos((double)p->parametricAngle) * (double)p->parentDistance);
+    p->parametricPosition[1] = (real_t)(sin((double)p->parametricAngle) * (double)p->parentDistance);
+
+    // Apparent 3D position with respect to their parent's coordinate system.
+    p->apparentPosition[0] = p->parametricPosition[0] * cos(p->solarTilt * (real_t)(M_PI / 180.0)); 
+    p->apparentPosition[1] = p->parametricPosition[0] * sin(p->solarTilt * (real_t)(M_PI / 180.0));
+    p->apparentPosition[2] = p->parametricPosition[1];
+
+    if (p->parent != NULL)
+    {
+        // Add parent's apparent coordinates to get 3D position with respect to the global coordinate system.
+        p->apparentPosition[0] += p->parent->apparentPosition[0];
+        p->apparentPosition[1] += p->parent->apparentPosition[1];
+        p->apparentPosition[2] += p->parent->apparentPosition[2];
+    }
 }
 
 // Returns an array of the body's system centre of rotation, along with 
@@ -207,7 +223,11 @@ void renderStellarObject(
 
     glColor3ubv(p->color);
 
+    glMatrixMode(GL_MODELVIEW);
+
     glPushMatrix();
+
+    glLoadIdentity();
 
     if (n_ancestors == NULL)
         n_ancestors = &tmp_n_ancestors;
@@ -218,28 +238,28 @@ void renderStellarObject(
     // Apply the transformations of all previous astrological systems' centres of rotation. 
     for (int i = *n_ancestors - 1; i >= 0; --i) 
     {
-        glRotatef(ancestors[i]->solarTilt, 0, 0, 1);
-
+        glRotatef((float)ancestors[i]->solarTilt, .0f, .0f, 1.0f);
+    
         glTranslatef(
-            ancestors[i]->position[0],
-            ancestors[i]->position[1],
-            ancestors[i]->position[2]
+            (float)ancestors[i]->parametricPosition[0],
+            .0f,
+            (float)ancestors[i]->parametricPosition[1]
         );
     }
 
     if (!usesCachedAncestors)
         free(ancestors);
 
-    glRotatef(p->solarTilt, 0, 0, 1);
+    glRotatef((float)p->solarTilt, .0f, .0f, 1.0f);
 
     // The above transformations are saved as they will be 
     // used for rendering the StellarObject's trajectory as well.
     glPushMatrix();
 
     glTranslatef(
-        p->position[0], 
-        p->position[1], 
-        p->position[2]
+        (float)p->parametricPosition[0], 
+        .0f, 
+        (float)p->parametricPosition[1]
     );
 
     if (p->hasTexture)
@@ -249,12 +269,14 @@ void renderStellarObject(
     }
 
     glPushMatrix();
+    
+    // updateStellarObjectApparentPosition(p);
 
-    glRotatef(p->solarTilt - 90.0f, 1.0f, .0f, .0f);
+    glRotatef((float)p->solarTilt - 90.0f, 1.0f, .0f, .0f);
     // Animation for rotation around axis.
-    glRotatef(p->selfParametricAngle * (float)(180.0 / M_PI), .0f, .0f, 1.0f);
+    glRotatef((float)(p->selfParametricAngle * (real_t)(180.0 / M_PI)), .0f, .0f, 1.0f);
     // Render planet.
-    gluSphere(p->quad, p->radius, 64, 32);
+    gluSphere(p->quad, (double)p->radius, 64, 32);
 
     glPopMatrix();
 
@@ -265,7 +287,7 @@ void renderStellarObject(
 
     // Render planet's nametag
     renderStringInWorld(
-        .0f, p->radius * 1.1f, .0f,
+        .0f, (float)(p->radius * (real_t)1.1), .0f,
         GLUT_BITMAP_9_BY_15, p->name,
         0xFF, 0xFF, 0xFF
     );
@@ -274,9 +296,13 @@ void renderStellarObject(
 
     if (render_trajectory)
     {
-        glColor4f(p->color[0], p->color[1], p->color[2], 0.15f);
+        glColor4ub(p->color[0], p->color[1], p->color[2], 38);
 
-        glScalef(p->parentDistance, p->parentDistance, p->parentDistance);
+        glScalef(
+            (float)p->parentDistance, 
+            (float)p->parentDistance, 
+            (float)p->parentDistance
+        );
 
         glCallList(trajectory_list);
     }
@@ -467,8 +493,8 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
             }
         }
 
-        float orbitPeriodRaw = (cJSON_IsNull(orbit_period) ? 1.0f : (float)orbit_period->valuedouble);
-        float parentDistanceRaw = (cJSON_IsNull(parent_dist) ? 0.0f : (float)parent_dist->valuedouble);
+        real_t orbitPeriodRaw = (cJSON_IsNull(orbit_period) ? (real_t)1.0 : (real_t)orbit_period->valuedouble);
+        real_t parentDistanceRaw = (cJSON_IsNull(parent_dist) ? (real_t)0.0 : (real_t)parent_dist->valuedouble);
 
         cJSON* r = cJSON_GetArrayItem(color, 0);
         cJSON* g = cJSON_GetArrayItem(color, 1);
@@ -499,14 +525,14 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
 
                 initStellarObject(
                     name->valuestring,
-                    (float)radius->valuedouble,
+                    (real_t)radius->valuedouble,
                     orbitPeriodRaw,
                     parentRaw,
                     parentDistanceRaw,
-                    (float)solar_tilt->valuedouble,
+                    (real_t)solar_tilt->valuedouble,
                     textureId,
                     has_texture,
-                    (float)day_period->valuedouble
+                    (real_t)day_period->valuedouble
                 ),
 
                 (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint

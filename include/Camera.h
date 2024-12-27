@@ -10,74 +10,74 @@
 
 typedef struct Camera
 {
-    vector3f position;
+    vector3r position;
 
-    vector3f lookAt;
+    vector3r lookAt;
 
-    vector3f upVector;
+    vector3r upVector;
 
-    float movementSpeed;
+    real_t movementSpeed;
 
-    float renderDistance;
+    real_t renderDistance;
     
 } Camera;
 
 
 Camera* initCamera(
-    float pos_x, float pos_y, float pos_z,
-    float ori_x, float ori_y, float ori_z,
-    float up_x, float up_y, float up_z,
-    float render_distance
+    double pos_x, double pos_y, double pos_z,
+    double ori_x, double ori_y, double ori_z,
+    double up_x, double up_y, double up_z,
+    double render_distance
 )
 {
     Camera* camera = (Camera *)malloc(sizeof(Camera));
 
-    camera->position[0] = pos_x;
-    camera->position[1] = pos_y;
-    camera->position[2] = pos_z;
+    camera->position[0] = (real_t)pos_x;
+    camera->position[1] = (real_t)pos_y;
+    camera->position[2] = (real_t)pos_z;
     
-    camera->lookAt[0] = ori_x;
-    camera->lookAt[1] = ori_y;
-    camera->lookAt[2] = ori_z;
+    camera->lookAt[0] = (real_t)ori_x;
+    camera->lookAt[1] = (real_t)ori_y;
+    camera->lookAt[2] = (real_t)ori_z;
 
-    float len = vectorLength3fv(camera->lookAt);
+    real_t len = vectorLength3rv(camera->lookAt);
 
     // Regularization, if needed.
     camera->lookAt[0] /= len;
     camera->lookAt[1] /= len;
     camera->lookAt[2] /= len;
 
-    camera->upVector[0] = up_x;
-    camera->upVector[1] = up_y;
-    camera->upVector[2] = up_z;
+    camera->upVector[0] = (real_t)up_x;
+    camera->upVector[1] = (real_t)up_y;
+    camera->upVector[2] = (real_t)up_z;
 
-    camera->movementSpeed = 0.5f;
-    camera->renderDistance = render_distance;
+    camera->movementSpeed = (real_t)0.5;
+    camera->renderDistance = (real_t)render_distance;
 
     return camera;
 }
 
 void updateCamera(Camera* camera)
-{   
+{
     glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     gluPerspective(60.0, 16.0 / 9.0, 0.01, (double)camera->renderDistance);
 
-    float sin_vert = sinf(CameraAngleVertical);
-	float sin_horz = sinf(CameraAngleHorizontal);
-	float cos_vert = cosf(CameraAngleVertical);
-	float cos_horz = cosf(CameraAngleHorizontal);
+    double sin_vert = sin((double)CameraAngleVertical);
+	double sin_horz = sin((double)CameraAngleHorizontal);
+	double cos_vert = cos((double)CameraAngleVertical);
+	double cos_horz = cos((double)CameraAngleHorizontal);
 
     // Camera direction, defined by the unary sphere.
-    camera->lookAt[0] = cos_vert * sin_horz;
-    camera->lookAt[1] = sin_vert;
-    camera->lookAt[2] = cos_vert * cos_horz;
+    camera->lookAt[0] = (real_t)(cos_vert * sin_horz);
+    camera->lookAt[1] = (real_t)sin_vert;
+    camera->lookAt[2] = (real_t)(cos_vert * cos_horz);
 
-    float movementSpeed = camera->movementSpeed;
+    real_t movementSpeed = camera->movementSpeed;
 
     if (shift_key_down) 
     {
-        movementSpeed *= 10;
+        movementSpeed *= (real_t)10.0;
     }
 
     if (keystrokes['W'])
@@ -118,17 +118,17 @@ void updateCamera(Camera* camera)
     }
 
     gluLookAt(
-        camera->position[0], 
-        camera->position[1], 
-        camera->position[2],
+        (double)camera->position[0], 
+        (double)camera->position[1], 
+        (double)camera->position[2],
 
-        camera->position[0] + camera->lookAt[0], 
-        camera->position[1] + camera->lookAt[1], 
-        camera->position[2] + camera->lookAt[2],
+        (double)(camera->position[0] + camera->lookAt[0]), 
+        (double)(camera->position[1] + camera->lookAt[1]), 
+        (double)(camera->position[2] + camera->lookAt[2]),
 
-        camera->upVector[0], 
-        camera->upVector[1], 
-        camera->upVector[2]
+        (double)camera->upVector[0], 
+        (double)camera->upVector[1], 
+        (double)camera->upVector[2]
     );
 }
 

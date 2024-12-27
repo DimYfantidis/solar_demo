@@ -22,11 +22,11 @@ typedef struct AmbientStars
 
     int numberOfStars;
 
-    vector3f* positions;
+    vector3r* positions;
 
     GLUquadric** quads;
 
-    float sizeInWorld;
+    real_t sizeInWorld;
 
     GLuint texture;
 
@@ -39,11 +39,11 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
 
     stars->numberOfStars = numberOfStars;
     
-    stars->positions = (vector3f*)malloc(numberOfStars * sizeof(vector3f));
+    stars->positions = (vector3r*)malloc(numberOfStars * sizeof(vector3r));
 
     stars->POVanchor = POVanchor;
 
-    stars->sizeInWorld = POVanchor->renderDistance * 0.0007f;
+    stars->sizeInWorld = (real_t)POVanchor->renderDistance * 0.0007;
 
     stars->quads = (GLUquadric **)malloc(numberOfStars * sizeof(GLUquadric *));
 
@@ -54,19 +54,19 @@ AmbientStars* buildStars(const int numberOfStars, Camera* POVanchor)
         stars->quads[i] = gluNewQuadric();
         gluQuadricDrawStyle(stars->quads[i], GLU_FILL);
 
-        float x = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
-        float y = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
-        float z = (float)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
+        real_t x = (real_t)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
+        real_t y = (real_t)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
+        real_t z = (real_t)(2.0 * ((double)rand() / RAND_MAX) - 1.0);
 
-        float len = sqrtf(x * x + y * y + z * z);
+        real_t len = (real_t)sqrt((double)(x * x + y * y + z * z));
 
         x /= len;
         y /= len;
         z /= len;
 
-        stars->positions[i][0] = x * (POVanchor->renderDistance * 0.8f);
-        stars->positions[i][1] = y * (POVanchor->renderDistance * 0.8f);
-        stars->positions[i][2] = z * (POVanchor->renderDistance * 0.8f);
+        stars->positions[i][0] = (real_t)(x * (POVanchor->renderDistance * (real_t)0.8));
+        stars->positions[i][1] = (real_t)(y * (POVanchor->renderDistance * (real_t)0.8));
+        stars->positions[i][2] = (real_t)(z * (POVanchor->renderDistance * (real_t)0.8));
     }
 
     return stars;
@@ -82,7 +82,7 @@ AmbientStars* buildStarsFromTexture(const char* data_dir, Camera* POVanchor)
 
     stars->POVanchor = POVanchor;
 
-    stars->sizeInWorld = .0f;
+    stars->sizeInWorld = (real_t).0;
 
     stars->quads = (GLUquadric **)malloc(sizeof(GLUquadric *));
 
@@ -130,15 +130,15 @@ void renderStars(AmbientStars* stars)
             glPushMatrix();
 
             glTranslatef(
-            stars->POVanchor->position[0], 
-            stars->POVanchor->position[1],
-            stars->POVanchor->position[2]
+                (float)stars->POVanchor->position[0], 
+                (float)stars->POVanchor->position[1],
+                (float)stars->POVanchor->position[2]
             );
 
             glTranslatef(
-                stars->positions[i][0], 
-                stars->positions[i][1],
-                stars->positions[i][2]
+                (float)stars->positions[i][0], 
+                (float)stars->positions[i][1],
+                (float)stars->positions[i][2]
             );
 
             gluSphere(stars->quads[i], stars->sizeInWorld, 3, 3);
@@ -157,16 +157,16 @@ void renderStars(AmbientStars* stars)
         glBindTexture(GL_TEXTURE_2D, stars->texture);
 
         glTranslatef(
-            stars->POVanchor->position[0], 
-            stars->POVanchor->position[1],
-            stars->POVanchor->position[2]
+            (float)stars->POVanchor->position[0], 
+            (float)stars->POVanchor->position[1],
+            (float)stars->POVanchor->position[2]
         );
 
         glRotatef(100.0f, 0.957826f, -0.287348f, 0.0f);
 
         gluSphere(
             stars->quads[0], 
-            stars->POVanchor->renderDistance * 0.8, 
+            (double)stars->POVanchor->renderDistance * 0.8, 
             128, 64
         );
 

@@ -18,6 +18,13 @@ file(GLOB SOURCES "src/main.c")
 # Add the executable target
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Set C11 standard for this specific target
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
+    C_EXTENSIONS OFF
+)
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME} freeglut)
 target_link_libraries(${PROJECT_NAME} cjson)

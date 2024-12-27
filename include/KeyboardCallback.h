@@ -1,15 +1,21 @@
 #ifndef KEYBOARD_CALLBACK_H
 #define KEYBOARD_CALLBACK_H
 
+#include <time.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <GL/glut.h>
+
+#include "Timer.h"
 
 
 bool keystrokes[256];
 bool shift_key_down = false;
 bool ctrl_key_down = false;
 bool alt_key_down = false;
+
+bool arrowDownLoaded = false;
+bool arrowUpLoaded = false;
 
 
 void callbackKeyboard(unsigned char key, int x, int y)
@@ -30,7 +36,44 @@ void callbackKeyboardUp(unsigned char key, int x, int y)
 
 void callbackSpecialKeyboard(int key, int x, int y)
 {
+    static const uint64_t cooldown_ms = 100;
+    
+    static uint64_t cooldown_ts = 0;
+    static uint64_t current_ms = 0;
 
+
+    if ((current_ms = getAbsoluteTimeMillis()) - cooldown_ts >= cooldown_ms)
+    {
+        cooldown_ts = current_ms;
+
+        if (key == GLUT_KEY_DOWN)
+            arrowDownLoaded = true;
+        
+        if (key == GLUT_KEY_UP)
+            arrowUpLoaded = true;
+    }
+}
+
+void keyToggle(char key, bool* toggleVar, uint64_t ms)
+{
+    static bool initialised = false;
+    static uint64_t timestampPrev[256];
+
+    if (!initialised)
+    {
+        for (int i = 0; i < sizeof(timestampPrev) / sizeof(timestampPrev[0]); ++i)
+            timestampPrev[i] = 0;
+        
+        initialised = true;
+    }
+
+    uint64_t elapsed_ms = getAbsoluteTimeMillis() - timestampPrev[key];
+
+    if (keystrokes[key] && elapsed_ms >= ms)
+    {
+        timestampPrev[key] = getAbsoluteTimeMillis();
+        *toggleVar = !(*toggleVar);
+    }
 }
 
 

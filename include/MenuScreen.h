@@ -9,27 +9,40 @@
 #include "Camera.h"
 #include "CustomTypes.h"
 #include "TextRendering.h"
+#include "KeyboardCallback.h"
 
 
 struct MenuScreen
 {
-    Camera* POVanchor;
-    char** optionNames;
+    float* pWindowMatrix;
+
+    int screenWidth;
+    int screenHeight;
+
     int numOptions;
+
+    char** optionNames;
+
     int currentlySelectedOption;
+
     float optionBoxWidth;
     float optionBoxHeight;
 };
 typedef struct MenuScreen MenuScreen;
 
 
-MenuScreen* initMenuScreen(Camera* camera, int n_options, ...)
+MenuScreen* initMenuScreen(float* pWindowMatrix, int n_options, ...)
 {
     MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    menuScreen->POVanchor = camera;
+    menuScreen->pWindowMatrix = pWindowMatrix;
+
     menuScreen->numOptions = n_options;
+
     menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
+
+    menuScreen->currentlySelectedOption = 0;
+
 
     va_list optionStringsArgumentList;
 
@@ -47,13 +60,18 @@ MenuScreen* initMenuScreen(Camera* camera, int n_options, ...)
     return menuScreen;
 }
 
-MenuScreen* initMenuScreenEmpty(Camera* camera, int n_options)
+MenuScreen* initMenuScreenEmpty(float* pWindowMatrix, int n_options)
 {
     MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    menuScreen->POVanchor = camera;
+    menuScreen->pWindowMatrix = pWindowMatrix;
+    
     menuScreen->numOptions = n_options;
+
     menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
+    
+    menuScreen->currentlySelectedOption = 0;
+
 
     for (int i = 0; i < n_options; ++i) 
     {
@@ -63,100 +81,123 @@ MenuScreen* initMenuScreenEmpty(Camera* camera, int n_options)
     return menuScreen;
 }
 
-bool setMenuScreenBoxDimensions(MenuScreen* menuScreen, float width, float height)
+MenuScreen* setMenuScreenDimensions(MenuScreen* m, int width, int height)
 {
-    if (width <= .0 || height <= .0 || width > 1. || height > 1.) {
+    m->screenWidth = width;
+    m->screenHeight = height;
+    return m;
+}
+
+MenuScreen* setMenuScreenBoxDimensions(MenuScreen* m, float width, float height)
+{
+    m->optionBoxWidth = width;
+    m->optionBoxHeight = height;
+    return m;
+}
+
+bool assignMenuScreenElement(MenuScreen* m, int idx, const char* option_at_idx)
+{
+    if (idx < 0 || idx > m->numOptions) {
         return false;
     }
-    menuScreen->optionBoxWidth = width;
-    menuScreen->optionBoxHeight = height;
+    if (m->optionNames[idx] != NULL) {
+        free(m->optionNames[idx]);
+    }
+    m->optionNames[idx] = strBuild(option_at_idx);
 
     return true;
 }
 
-bool assignMenuScreenElement(MenuScreen* menuScreen, int idx, const char* option_at_idx)
+void renderMenuScreen(MenuScreen* m)
 {
-    if (idx < 0 || idx > menuScreen->numOptions) {
-        return false;
-    }
-    if (menuScreen->optionNames[idx] != NULL) {
-        free(menuScreen->optionNames[idx]);
-    }
-    menuScreen->optionNames[idx] = strBuild(option_at_idx);
-
-    return true;
-}
-
-void renderMenuScreen(MenuScreen* menuScreen)
-{
-    static const float spaceBetweenBoxes = 0.001f;
-
-    float mainBoxWidth = menuScreen->optionBoxWidth + 2 * spaceBetweenBoxes;
-    float mainBoxHeight = (menuScreen->numOptions + 1) * spaceBetweenBoxes
-        + menuScreen->numOptions * menuScreen->optionBoxHeight;
-
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    
-    glLoadIdentity();
-
-#define SCALE_X 0.0001f
-#define SCALE_Y 0.0001f
-#define SCALE_Z 0.0001f
-
-    gluPerspective(60, 16 / 9, 0.01, 2.0 / SCALE_Z);
-
-    gluLookAt(
-        0, 0, 1,
-        0, 0, -1,
-        0, 1, 0
-    );
+    glLoadMatrixf(m->pWindowMatrix);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-
-    glColor3f(0.2f, 0.2f, 0.2f);
-
     glLoadIdentity();
+
+
+    glColor4f(.3f, .3f, .3f, 0.5f);
+
+
+    float hiBorder = 0.5f + (m->numOptions / 2 + 1) * .05f;
+    float loBorder = 0.5f - (m->numOptions / 2 + 1) * .05f;
+    
     glBegin(GL_QUADS);
     {
-        glVertex3f(.05f / SCALE_X, (-0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
-        glVertex3f(-.05f / SCALE_X, (-0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
-        glVertex3f(-.05f / SCALE_X, (0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
-        glVertex3f(.05f / SCALE_X, (0.02f * menuScreen->numOptions / 2) / SCALE_Y, -.5f / SCALE_Z);
+        glColor4f(.3f, .3f, .3f, 0.5f);
+
+        glVertex3f(0.0f * m->screenWidth, 1.0f * m->screenHeight, .0f);
+        glVertex3f(1.0f * m->screenWidth, 1.0f * m->screenHeight, .0f);
+        glVertex3f(1.0f * m->screenWidth, 0.0f * m->screenHeight, .0f);
+        glVertex3f(0.0f * m->screenWidth, 0.0f * m->screenHeight, .0f);
+        
+        glColor4f(.1f, .1f, .1f, 1.0f);
+
+        glVertex3f(0.40f * m->screenWidth, hiBorder * m->screenHeight, .1f);
+        glVertex3f(0.60f * m->screenWidth, hiBorder * m->screenHeight, .1f);
+        glVertex3f(0.60f * m->screenWidth, loBorder * m->screenHeight, .1f);
+        glVertex3f(0.40f * m->screenWidth, loBorder * m->screenHeight, .1f);
     }
     glEnd();
 
-    glColor3f(1.0f, 1.0f, 1.0f);
-    
-    for (int i = 0; i < menuScreen->numOptions; ++i)
+    glTranslatef(.0f, .0f, .2f);
+
+    float offset = hiBorder - .05f;
+
+    for (int i = 0; i < m->numOptions; ++i)
     {
-        glLoadIdentity();
-        glScalef(SCALE_X, SCALE_Y, SCALE_Z);
-        unsigned char* opt = (unsigned char*)menuScreen->optionNames[i];
-        glTranslatef(
-            -0.05f / SCALE_X, 
-            (-.03f * (i - menuScreen->numOptions / 2)) / SCALE_Y, 
-            .2f / SCALE_Z);
-        glutStrokeString(GLUT_STROKE_MONO_ROMAN, opt);
+        glColor4f(0xFF, 0xFF, 0xFF, 1.0f);
+
+        if (i == m->currentlySelectedOption) 
+        {
+            glRasterPos2f(0.46f * m->screenWidth, offset * m->screenHeight);
+            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '>');
+        }
+
+        glRasterPos2f(0.48f * m->screenWidth, offset * m->screenHeight);
+
+        glutBitmapString(
+            GLUT_BITMAP_9_BY_15, 
+            (const unsigned char*)m->optionNames[i]
+        );
+
+        offset -= .05f;
     }
+    
 
-#undef SCALE_X
-#undef SCALE_Y
-#undef SCALE_Z
-
-    glPopMatrix();
     glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 }
 
-void deleteMenuScreen(MenuScreen* menuScreen)
+void menuScreenHandler(MenuScreen* m)
 {
-    for (int i = 0; i < menuScreen->numOptions; ++i) {
-        free(menuScreen->optionNames[i]);
+    if (arrowDownLoaded)
+    {
+        if (m->currentlySelectedOption < m->numOptions - 1)
+            m->currentlySelectedOption += 1;
+        arrowDownLoaded = false;
     }
-    free(menuScreen->optionNames);
-    free(menuScreen);
+    if (arrowUpLoaded)
+    {
+        if (m->currentlySelectedOption > 0)
+            m->currentlySelectedOption -= 1;
+        arrowUpLoaded = false;
+    }
+}
+
+void deleteMenuScreen(MenuScreen* m)
+{
+    for (int i = 0; i < m->numOptions; ++i) {
+        free(m->optionNames[i]);
+    }
+    free(m->optionNames);
+    free(m);
 }
 
 #endif // MENU_SCREEN_H

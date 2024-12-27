@@ -10,15 +10,34 @@
 
 
 typedef char byte;
+
 typedef unsigned char ubyte;
 
+typedef double real_t;
+
+typedef float vector4f[4];
 typedef float vector3f[3];
+typedef float vector2f[2];
+
+typedef double vector4d[4];
+typedef double vector3d[3];
+typedef double vector2d[2];
+
+typedef real_t vector4r[4];
+typedef real_t vector3r[3];
+typedef real_t vector2r[2];
+
 typedef ubyte vector3ub[3];
 
 
 float vectorLength3fv(vector3f v)
 {
     return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+real_t vectorLength3rv(vector3r v)
+{
+    return (real_t)sqrt((double)(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]));
 }
 
 float clampf(float x, float lo, float hi)
@@ -81,7 +100,7 @@ char* strCat(int n_strings, ...)
     return result;
 }
 
-float AUtoR(float au)
+real_t AUtoR(real_t au)
 {
     return au * 450;
 }
@@ -104,6 +123,33 @@ size_t getFileSizeInBytes(const char* filename)
 
     return size;
 }
+
+/* Performs matrix multiplication. It is considered that the input and output matrices
+ * are allocated on the stack as float[][] and not as float**. Thus they must be flattened
+ * by casting them to float* before passing them as arguments.
+ * Input:
+ *	- A, B: The matrices who will be multplied by A*B
+ *	- N, K, M: The dimensions of the matrices, A:NxK & B:KxM
+ * Output:
+ *	- prod: The product of A and B
+ */
+void matrixMultiplication(real_t* prod, const real_t* A, const real_t* B, size_t N, size_t K, size_t M)
+{
+	size_t i, j, k;
+
+	for (i = 0; i < N; ++i)
+	{
+		for (j = 0; j < M; ++j)
+		{
+			prod[M * i + j] = .0f;
+			for (k = 0; k < K; ++k)
+			{
+				prod[M * i + j] += A[K * i + k] * B[M * k + j];
+			}
+		}
+	}
+}
+
 
 
 #endif // CUSTOM_TYPES_H
