@@ -14,7 +14,7 @@
 
 struct MenuScreen
 {
-    float* pWindowMatrix;
+    const float* pWindowMatrix;
 
     int screenWidth;
     int screenHeight;
@@ -31,17 +31,17 @@ struct MenuScreen
 typedef struct MenuScreen MenuScreen;
 
 
-MenuScreen* initMenuScreen(float* pWindowMatrix, int n_options, ...)
+MenuScreen* initMenuScreen(const float* pWindowMatrix, const int n_options, ...)
 {
-    MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
+    MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    menuScreen->pWindowMatrix = pWindowMatrix;
+    m->pWindowMatrix = pWindowMatrix;
 
-    menuScreen->numOptions = n_options;
+    m->numOptions = n_options;
 
-    menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
+    m->optionNames = (char **)malloc(n_options * sizeof(char *));
 
-    menuScreen->currentlySelectedOption = 0;
+    m->currentlySelectedOption = 0;
 
 
     va_list optionStringsArgumentList;
@@ -52,33 +52,33 @@ MenuScreen* initMenuScreen(float* pWindowMatrix, int n_options, ...)
     {
         const char* option = va_arg(optionStringsArgumentList, const char*);
 
-        menuScreen->optionNames[i] = strBuild(option);
+        m->optionNames[i] = strBuild(option);
     }
 
     va_end(optionStringsArgumentList);
 
-    return menuScreen;
+    return m;
 }
 
 MenuScreen* initMenuScreenEmpty(float* pWindowMatrix, int n_options)
 {
-    MenuScreen* menuScreen = (MenuScreen *)malloc(sizeof(MenuScreen));
+    MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    menuScreen->pWindowMatrix = pWindowMatrix;
+    m->pWindowMatrix = pWindowMatrix;
     
-    menuScreen->numOptions = n_options;
+    m->numOptions = n_options;
 
-    menuScreen->optionNames = (char **)malloc(n_options * sizeof(char *));
+    m->optionNames = (char **)malloc(n_options * sizeof(char *));
     
-    menuScreen->currentlySelectedOption = 0;
+    m->currentlySelectedOption = 0;
 
 
     for (int i = 0; i < n_options; ++i) 
     {
-        menuScreen->optionNames[i] = NULL;
+        m->optionNames[i] = NULL;
     }
 
-    return menuScreen;
+    return m;
 }
 
 MenuScreen* setMenuScreenDimensions(MenuScreen* m, int width, int height)
@@ -124,7 +124,7 @@ void renderMenuScreen(MenuScreen* m)
 
     float hiBorder = 0.5f + (m->numOptions / 2 + 1) * .05f;
     float loBorder = 0.5f - (m->numOptions / 2 + 1) * .05f;
-    
+
     glBegin(GL_QUADS);
     {
         glColor4f(.3f, .3f, .3f, 0.5f);
@@ -175,7 +175,7 @@ void renderMenuScreen(MenuScreen* m)
     glPopMatrix();
 }
 
-void menuScreenHandler(MenuScreen* m)
+const char* menuScreenHandler(MenuScreen* m, int* optionID)
 {
     if (arrowDownLoaded)
     {
@@ -189,12 +189,23 @@ void menuScreenHandler(MenuScreen* m)
             m->currentlySelectedOption -= 1;
         arrowUpLoaded = false;
     }
+    
+    if (keystrokes['\n'] || keystrokes['\f'] || keystrokes['\r'])
+    {
+        if (optionID != NULL)
+            *optionID = m->currentlySelectedOption;
+            
+        return m->optionNames[m->currentlySelectedOption];
+    }
+    return NULL;
 }
 
 void deleteMenuScreen(MenuScreen* m)
 {
-    for (int i = 0; i < m->numOptions; ++i) {
-        free(m->optionNames[i]);
+    for (int i = 0; i < m->numOptions; ++i) 
+    {
+        if (m->optionNames[i] != NULL)
+            free(m->optionNames[i]);
     }
     free(m->optionNames);
     free(m);

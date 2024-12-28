@@ -111,6 +111,8 @@ ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned 
             image[offset + 0] = fgetc(fp);
         }
     }
+    
+    fclose(fp);
 
     if (debug)
     {   
@@ -133,8 +135,6 @@ ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned 
         printf("biClrImportant:%i\n", bmih.biClrImportant);
         printf("--------------------\n");
     }
-
-    fclose(fp);
 
     return image;
 }

@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 
 #include "CustomTypes.h"
+#include "StellarObject.h"
 #include "KeyboardCallback.h"
 #include "PassiveMotionCallback.h"
 
@@ -19,6 +20,8 @@ typedef struct Camera
     real_t movementSpeed;
 
     real_t renderDistance;
+
+    StellarObject* anchor;
     
 } Camera;
 
@@ -54,6 +57,8 @@ Camera* initCamera(
     camera->movementSpeed = (real_t)0.5;
     camera->renderDistance = (real_t)render_distance;
 
+    camera->anchor = NULL;
+
     return camera;
 }
 
@@ -74,6 +79,35 @@ void updateCamera(Camera* camera)
     camera->lookAt[2] = (real_t)(cos_vert * cos_horz);
 
     real_t movementSpeed = camera->movementSpeed;
+
+
+    if (camera->anchor != NULL)
+    {
+        camera->position[0] = camera->anchor->apparentPosition[0];
+        camera->position[1] = camera->anchor->apparentPosition[1];
+        camera->position[2] = camera->anchor->apparentPosition[2];
+
+        camera->position[0] += camera->anchor->radius * (real_t)4.5;
+        camera->position[1] += camera->anchor->radius * (real_t)4.5;
+        camera->position[2] += camera->anchor->radius * (real_t)4.5;
+
+        gluLookAt(
+            (double)camera->position[0], 
+            (double)camera->position[1], 
+            (double)camera->position[2],
+
+            (double)(camera->position[0] + camera->lookAt[0]), 
+            (double)(camera->position[1] + camera->lookAt[1]), 
+            (double)(camera->position[2] + camera->lookAt[2]),
+
+            (double)camera->upVector[0], 
+            (double)camera->upVector[1], 
+            (double)camera->upVector[2]
+        );
+
+        return;
+    }
+
 
     if (shift_key_down) 
     {

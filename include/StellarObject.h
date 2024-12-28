@@ -42,6 +42,9 @@ typedef struct StellarObject
     // The trajectory's angle relevant to the parent's coordinate system.
     real_t solarTilt;
 
+    real_t sinCummulativeSolarTilt;
+    real_t cosCummulativeSolarTilt;
+
     real_t selfAngularVelocity;
 
     real_t selfParametricAngle;
@@ -109,6 +112,15 @@ StellarObject* initStellarObject(
 
     gluQuadricDrawStyle(p->quad, GLU_FILL);
 
+
+    real_t cummulativeSolarTilt = (real_t).0;
+    
+    for (StellarObject* iterator = p; iterator != NULL; iterator = iterator->parent)
+        cummulativeSolarTilt += iterator->solarTilt;
+
+    p->cosCummulativeSolarTilt = (real_t)cos((double)cummulativeSolarTilt * (M_PI / 180.0));
+    p->sinCummulativeSolarTilt = (real_t)sin((double)cummulativeSolarTilt * (M_PI / 180.0));
+
     return p;
 }
 
@@ -161,8 +173,8 @@ void updateStellarObject(StellarObject* p, real_t speed_factor, real_t dt)
     p->parametricPosition[1] = (real_t)(sin((double)p->parametricAngle) * (double)p->parentDistance);
 
     // Apparent 3D position with respect to their parent's coordinate system.
-    p->apparentPosition[0] = p->parametricPosition[0] * cos(p->solarTilt * (real_t)(M_PI / 180.0)); 
-    p->apparentPosition[1] = p->parametricPosition[0] * sin(p->solarTilt * (real_t)(M_PI / 180.0));
+    p->apparentPosition[0] = p->parametricPosition[0] * p->cosCummulativeSolarTilt;
+    p->apparentPosition[1] = p->parametricPosition[0] * p->sinCummulativeSolarTilt;
     p->apparentPosition[2] = p->parametricPosition[1];
 
     if (p->parent != NULL)
@@ -269,8 +281,6 @@ void renderStellarObject(
     }
 
     glPushMatrix();
-    
-    // updateStellarObjectApparentPosition(p);
 
     glRotatef((float)p->solarTilt - 90.0f, 1.0f, .0f, .0f);
     // Animation for rotation around axis.

@@ -151,16 +151,9 @@ int main(int argc, char* argv[])
 
 void display(void)
 {
-    if (keystrokes[27])
-    {
-        // Exit program when ESC is pressed.
-        glutDestroyWindow(window_id);
-        glutLeaveMainLoop();
-        return;
-    }
     keyToggle('H', &enableHUD, 250);
     keyToggle('P', &enablePlanetMenu, 250);
-    keyToggle('M', &enableMainMenu, 250);
+    keyToggle(27,  &enableMainMenu, 250);
 
     double elapsed_seconds = (double)(getAbsoluteTimeMillis() - refresh_ts) / 1000.0;
 
@@ -200,15 +193,40 @@ void display(void)
         renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
     }
 
+    const char* option;
+    int optionIndex;
+
     if (enableMainMenu)
     {
+        enablePlanetMenu = false;
+
         renderMenuScreen(mainMenuScreen);
-        menuScreenHandler(mainMenuScreen);
+
+        if ((option = menuScreenHandler(mainMenuScreen, NULL)) != NULL)
+        {
+            if (strcmp(option, "Free-fly") == 0)
+                camera->anchor = NULL;
+            
+            if (strcmp(option, "Exit") == 0)
+            {
+                // Exit program when ESC is pressed.
+                glutDestroyWindow(window_id);
+                glutLeaveMainLoop();
+                return;
+            }
+
+            enableMainMenu = false;
+        }
     }
     if (enablePlanetMenu)
     {
         renderMenuScreen(planetMenuScreen);
-        menuScreenHandler(planetMenuScreen);
+
+        if ((option = menuScreenHandler(planetMenuScreen, &optionIndex)) != NULL)
+        {
+            camera->anchor = stellarObjects[optionIndex];
+            enablePlanetMenu = false;
+        }
     }
 
     renderStars(starsSkyBox);
@@ -226,7 +244,7 @@ void display(void)
         snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", 1 / elapsed_seconds);
         renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
 
-        snprintf(logBuffer, sizeof(logBuffer), "Camera Position: (%.3f, %.3f, %.3f)", camera->position[0], camera->position[1], camera->position[2]);
+        snprintf(logBuffer, sizeof(logBuffer), "Camera Position: (%lf, %lf, %lf)", camera->position[0], camera->position[1], camera->position[2]);
         renderStringOnScreen(0.0, window_height - 30.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
 
         snprintf(logBuffer, sizeof(logBuffer), "Simulation Speed: %.4f", simulationSpeed);
@@ -248,7 +266,7 @@ void display(void)
         for (int i = 0; i < numStellarObjects; ++i)
         {
             snprintf(
-                logBuffer, sizeof(logBuffer), "%s's position: (%.3f, %.3f, %.3f)", 
+                logBuffer, sizeof(logBuffer), "%s's position: (%lf, %lf, %lf)", 
                 stellarObjects[i]->name, 
                 (float)stellarObjects[i]->apparentPosition[0], 
                 (float)stellarObjects[i]->apparentPosition[1], 
@@ -417,10 +435,8 @@ void initGlobals(int argc, char* argv[])
     mainMenuScreen = setMenuScreenDimensions(
         initMenuScreen(
             windowMatrix,
-            4,
-            "Option 1",
-            "Option 2",
-            "Option 3",
+            2,
+            "Free-fly",
             "Exit"
         ),
         window_width, window_height
