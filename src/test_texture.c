@@ -2,6 +2,14 @@
 #   define _CRT_SECURE_NO_WARNINGS
 #endif 
 
+#if defined(_WIN32)
+    #include <direct.h>
+    #define GetCurrentDir _getcwd
+#elif defined(__unix__)
+    #include <unistd.h>
+    #define GetCurrentDir getcwd
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glut.h>
@@ -62,16 +70,17 @@ int main(int argc, char* argv[])
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
     glutInitWindowSize(1280, 720);
-    glutInitWindowPosition((16.0 / 9.0) * 200.0, 200.0);
+    glutInitWindowPosition((int)((16.0 / 9.0) * 200), 200);
     int window_id = glutCreateWindow("Texture Testing");
 
     unsigned int width;
     unsigned int height;
 
     image = loadBitmapToRGBArray(
-        "C:\\Users\\axaio\\Desktop\\PROJECTS\\my_solar_system\\data\\the_solar_system\\The Sun.bmp",
+        "C:\\Users\\axaio\\Desktop\\PROJECTS\\solar_demo\\data\\the_solar_system\\The Sun.bmp",
         &width,
-        &height
+        &height,
+        true
     );
 
     glEnable(GL_TEXTURE_2D); // Enable 2D texturing

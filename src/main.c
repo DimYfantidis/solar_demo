@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Please specify the JSON file of the astronomical system's objects' data.\n");
         return EXIT_FAILURE;
     }
-
+    
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
 	glutInitWindowSize(1280, 720);
@@ -263,21 +263,6 @@ void display(void)
         getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), simulationElapsedTimeMilliseconds);
         snprintf(logBuffer, sizeof(logBuffer), "Elapsed Virtual time: %s", timeFormatBuffer);
         renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
-
-        float window_offset = 135.0f;
-        
-        for (int i = 0; i < numStellarObjects; ++i)
-        {
-            snprintf(
-                logBuffer, sizeof(logBuffer), "%s's position: (%lf, %lf, %lf)", 
-                stellarObjects[i]->name, 
-                (float)stellarObjects[i]->position[0], 
-                (float)stellarObjects[i]->position[1], 
-                (float)stellarObjects[i]->position[2]
-            );
-            renderStringOnScreen(0.0, window_height - window_offset, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
-            window_offset += 15.0f;
-        }
     }
 
     glutSwapBuffers();
