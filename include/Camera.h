@@ -83,9 +83,9 @@ void updateCamera(Camera* camera)
 
     if (camera->anchor != NULL)
     {
-        camera->position[0] = camera->anchor->apparentPosition[0];
-        camera->position[1] = camera->anchor->apparentPosition[1];
-        camera->position[2] = camera->anchor->apparentPosition[2];
+        camera->position[0] = camera->anchor->position[0];
+        camera->position[1] = camera->anchor->position[1];
+        camera->position[2] = camera->anchor->position[2];
 
         camera->position[0] += camera->anchor->radius * (real_t)4.5;
         camera->position[1] += camera->anchor->radius * (real_t)4.5;

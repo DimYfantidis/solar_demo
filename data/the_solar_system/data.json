@@ -52,7 +52,7 @@
             "parent" : "Earth", 
             "parent_dist" : 0.0025695553,
             "solar_tilt" : 0.0,
-            "day_period" : 656.0,
+            "day_period" : 655.68,
             "color" : [255, 255, 255]
         },
 

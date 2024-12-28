@@ -102,7 +102,7 @@ char* strCat(int n_strings, ...)
 
 real_t AUtoR(real_t au)
 {
-    return au * 450;
+    return au * 200.0;
 }
 
 size_t getFileSizeInBytes(const char* filename)

@@ -165,14 +165,14 @@ void display(void)
     }
     refresh_ts = getAbsoluteTimeMillis();
 
-#ifdef PROJ_DEBUG
-    printf("Clearing the screen (elapsed: %.3f sec)\n", elapsed_seconds);
-#endif
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
     camera->movementSpeed *= moveSpeedScaleFactor;
     updateCamera(camera);
     moveSpeedScaleFactor = 1.0f;
+
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -190,8 +190,12 @@ void display(void)
         // by v * dt, where v is its linear velocity.
         updateStellarObject(stellarObjects[i], simulationSpeed, (float)elapsed_seconds / 3600.0f);
         // Render the body as well as its trajectory.
-        renderStellarObject(stellarObjects[i], true, trajectoryListId, cachedAncestors[i], &numCachedAncestors[i]);
+        renderStellarObject(stellarObjects[i], true, trajectoryListId);
     }
+
+    camera->movementSpeed *= moveSpeedScaleFactor;
+    updateCamera(camera);
+    moveSpeedScaleFactor = 1.0f;
 
     const char* option;
     int optionIndex;
@@ -207,9 +211,8 @@ void display(void)
             if (strcmp(option, "Free-fly") == 0)
                 camera->anchor = NULL;
             
-            if (strcmp(option, "Exit") == 0)
+            else if (strcmp(option, "Exit") == 0)
             {
-                // Exit program when ESC is pressed.
                 glutDestroyWindow(window_id);
                 glutLeaveMainLoop();
                 return;
@@ -268,9 +271,9 @@ void display(void)
             snprintf(
                 logBuffer, sizeof(logBuffer), "%s's position: (%lf, %lf, %lf)", 
                 stellarObjects[i]->name, 
-                (float)stellarObjects[i]->apparentPosition[0], 
-                (float)stellarObjects[i]->apparentPosition[1], 
-                (float)stellarObjects[i]->apparentPosition[2]
+                (float)stellarObjects[i]->position[0], 
+                (float)stellarObjects[i]->position[1], 
+                (float)stellarObjects[i]->position[2]
             );
             renderStringOnScreen(0.0, window_height - window_offset, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
             window_offset += 15.0f;

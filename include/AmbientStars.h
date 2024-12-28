@@ -120,6 +120,12 @@ void deleteStars(AmbientStars* stars)
 
 void renderStars(AmbientStars* stars)
 {
+    glMatrixMode(GL_MODELVIEW);
+
+    glPushMatrix();
+
+    glLoadIdentity();
+
     if (stars->positions != NULL)
     {
         glColor3f(1.0f, 1.0f, 1.0f);
@@ -147,11 +153,9 @@ void renderStars(AmbientStars* stars)
         }
     }
     else
-    {   
+    {
+        // High Resolution Sky rendering.   
         glColor3f(0.3f, 0.3f, 0.3f);
-
-        // High Resolution Sky rendering.
-        glPushMatrix();
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, stars->texture);
@@ -171,9 +175,8 @@ void renderStars(AmbientStars* stars)
         );
 
         glDisable(GL_TEXTURE_2D);
-
-        glPopMatrix();
     }
+    glPopMatrix();
 }
 
 #endif // AMBIENT_STARS_H
