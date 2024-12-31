@@ -194,6 +194,7 @@ const char* menuScreenHandler(MenuScreen* m, int* optionID)
     {
         if (optionID != NULL)
             *optionID = m->currentlySelectedOption;
+        
         return m->optionNames[m->currentlySelectedOption];
     }
     

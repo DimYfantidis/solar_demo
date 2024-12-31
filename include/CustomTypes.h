@@ -6,6 +6,7 @@
 #endif 
 
 #include <math.h>
+#include <stdlib.h>
 #include <stdarg.h>
 
 
@@ -149,6 +150,54 @@ void matrixMultiplication(real_t* prod, const real_t* A, const real_t* B, size_t
 			}
 		}
 	}
+}
+
+
+// Routine for redirection to external address.
+int openBrowserAt(const char* address)
+{
+    int commandExitCode = -1;
+
+    static char cmdBuffer[1024];
+
+// Windows Case
+#if defined(_WIN32) || defined(__CYGWIN__)
+
+    // First attempt to open the page on the default browser.
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "rundll32 url.dll,FileProtocolHandler %s", address);
+    commandExitCode = system(cmdBuffer);
+
+    if (commandExitCode == EXIT_SUCCESS)
+        return commandExitCode;
+
+    // Second attempt to open web page on MS Edge.
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "START msedge %s", address);
+    commandExitCode = system(cmdBuffer);
+
+// Linux Case
+#elif defined(__linux__)
+
+    // First attempt to open the page on the default browser using the xgd-open tool
+    // from the xdg-utils package, which is commonly installed on most Linux distributions.
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "xdg-open %s", address);
+    commandExitCode = system(cmdBuffer);
+
+    if (commandExitCode == EXIT_SUCCESS)
+        return commandExitCode;
+
+    // Second attempt to open the web page, in case xgd-utils package is not installed.
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "firefox %s", address);
+    commandExitCode = system(cmdBuffer);
+
+// Mac OS X case
+#elif defined(__APPLE__) || defined(__MACH__)
+    
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "open %s", address);
+    commandExitCode = system(cmdBuffer);
+
+#endif
+
+    return commandExitCode;
 }
 
 

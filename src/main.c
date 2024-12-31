@@ -209,6 +209,22 @@ void display(void)
             if (strcmp(option, "Free-fly") == 0)
                 camera->anchor = NULL;
             
+            else if (strcmp(option, "Help") == 0)
+            {
+                static const char help_page[] = "https://github.com/DimYfantidis/solar_demo?tab=readme-ov-file#iv-interaction";
+
+                printf("Opening Help web-page: %s\n", help_page);
+
+                int status = openBrowserAt(help_page);
+
+                if (status != EXIT_SUCCESS)
+                    fprintf(
+                        stderr, 
+                        "Error: Could not open web-browser to the Help page; Please proceed to \"%s\" manually", 
+                        help_page
+                    );
+            }
+
             else if (strcmp(option, "Exit") == 0)
             {
                 glutDestroyWindow(window_id);
@@ -262,14 +278,21 @@ void display(void)
         snprintf(logBuffer, sizeof(logBuffer), "Elapsed Virtual time: %s", timeFormatBuffer);
         renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
     }
-    
+
+    float pixelOffsetCentre;
+
     if (camera->anchor != NULL)
     {
         snprintf(logBuffer, sizeof(logBuffer), "Press ESC -> \"Free-Fly\" -> ENTER to stop observing %s", camera->anchor->name);
-        
-        float pixelOffsetCentre = (float)strlen(logBuffer) / 2.0f;
-
+        pixelOffsetCentre = (float)strlen(logBuffer) / 2.0f;
         renderStringOnScreen(0.50f * window_width - pixelOffsetCentre * 9.0f, 0.20f * window_height, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+
+        renderStringOnScreen(
+            0.50f * window_width - 220.5f, 0.20f * window_height - 20.0f, 
+            GLUT_BITMAP_9_BY_15, 
+            "or press 'P' and choose another planet to observe", 
+            0xFF, 0xFF, 0xFF
+        );
     }
 
     glutSwapBuffers();
@@ -430,8 +453,9 @@ void initGlobals(int argc, char* argv[])
     mainMenuScreen = setMenuScreenDimensions(
         initMenuScreen(
             windowMatrix,
-            2,
+            3,
             "Free-fly",
+            "Help",
             "Exit"
         ),
         window_width, window_height
