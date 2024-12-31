@@ -54,7 +54,9 @@ void callbackSpecialKeyboard(int key, int x, int y)
     }
 }
 
-void keyToggle(char key, bool* toggleVar, uint64_t ms)
+
+// When the specified key is pressed, the boolean variable alternates between true and false every `timeout_ms` milliseconds.
+void keyToggle(char key, bool* toggleVar, uint64_t timeout_ms)
 {
     static bool initialised = false;
     static uint64_t timestampPrev[256];
@@ -69,7 +71,7 @@ void keyToggle(char key, bool* toggleVar, uint64_t ms)
 
     uint64_t elapsed_ms = getAbsoluteTimeMillis() - timestampPrev[key];
 
-    if (keystrokes[key] && elapsed_ms >= ms)
+    if (keystrokes[key] && elapsed_ms >= timeout_ms)
     {
         timestampPrev[key] = getAbsoluteTimeMillis();
         *toggleVar = !(*toggleVar);

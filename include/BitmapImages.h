@@ -1,6 +1,10 @@
 #ifndef IMAGES_H
 #define IMAGES_H
 
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#   define _CRT_SECURE_NO_WARNINGS
+#endif 
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -70,7 +74,7 @@ typedef struct tagBitmapInfoHeader BitmapInfoHeader;
 typedef struct tagBitmapFileHeader BitmapFileHeader;
 
 
-ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned int* height, bool debug)
+ubyte_t* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned int* height, bool debug)
 {
     FILE* fp;
     unsigned int x, y;
@@ -95,7 +99,7 @@ ubyte* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned 
     *width = bmih.biWidth;
     *height = bmih.biHeight;
 
-    ubyte* image = (ubyte *)malloc((*width) * (*height) * 3 * sizeof(ubyte));
+    ubyte_t* image = (ubyte_t *)malloc((*width) * (*height) * 3 * sizeof(ubyte_t));
 
     // Reading the pixels of input image
     for (y = 0; y < *height; y++)

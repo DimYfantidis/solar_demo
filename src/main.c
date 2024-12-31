@@ -1,10 +1,8 @@
-// #define PROJ_DEBUG
-
-#ifndef _CRT_SECURE_NO_WARNINGS
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #   define _CRT_SECURE_NO_WARNINGS
 #endif 
 
-#ifndef _USE_MATH_DEFINES
+#if defined(_MSC_VER) && !defined(_USE_MATH_DEFINES)
 #   define _USE_MATH_DEFINES
 #endif 
 
@@ -263,6 +261,15 @@ void display(void)
         getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), simulationElapsedTimeMilliseconds);
         snprintf(logBuffer, sizeof(logBuffer), "Elapsed Virtual time: %s", timeFormatBuffer);
         renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+    }
+    
+    if (camera->anchor != NULL)
+    {
+        snprintf(logBuffer, sizeof(logBuffer), "Press ESC -> \"Free-Fly\" -> ENTER to stop observing %s", camera->anchor->name);
+        
+        float pixelOffsetCentre = (float)strlen(logBuffer) / 2.0f;
+
+        renderStringOnScreen(0.50f * window_width - pixelOffsetCentre * 9.0f, 0.20f * window_height, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
     }
 
     glutSwapBuffers();

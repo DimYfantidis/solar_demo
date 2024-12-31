@@ -13,7 +13,7 @@ float windowMatrix[16];
 void renderStringOnScreen(
     float x, float y, 
     void* font, const char* string, 
-    ubyte r, ubyte g, ubyte b
+    ubyte_t r, ubyte_t g, ubyte_t b
 )
 {
     glPushAttrib(GL_COLOR_BUFFER_BIT);
@@ -38,7 +38,7 @@ void renderStringOnScreen(
 void renderStringInWorld(
     float x, float y, float z, 
     void* font, const char* string, 
-    byte r, byte g, byte b
+    byte_t r, byte_t g, byte_t b
 )
 {
     glColor3ub(r, g, b);

@@ -1,17 +1,17 @@
 #ifndef CUSTOM_TYPES_H
 #define CUSTOM_TYPES_H
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#   define _CRT_SECURE_NO_WARNINGS
+#if defined(_MSC_VER) && !defined(_USE_MATH_DEFINES)
+#   define _USE_MATH_DEFINES
 #endif 
 
 #include <math.h>
 #include <stdarg.h>
 
 
-typedef char byte;
+typedef char byte_t;
 
-typedef unsigned char ubyte;
+typedef unsigned char ubyte_t;
 
 typedef double real_t;
 
@@ -27,7 +27,7 @@ typedef real_t vector4r[4];
 typedef real_t vector3r[3];
 typedef real_t vector2r[2];
 
-typedef ubyte vector3ub[3];
+typedef ubyte_t vector3ub[3];
 
 
 float vectorLength3fv(vector3f v)
@@ -66,6 +66,7 @@ char* strCat(int n_strings, ...)
     va_start(stringsToBeConcatenatedList, n_strings);
 
     size_t lengthOfResultString = 0;
+
 
     for (int i = 0; i < n_strings; ++i)
     {

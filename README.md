@@ -110,9 +110,9 @@ This project demands the existence of a base **Python3** interpeter, **CMake ver
 
 ### I. JSON data
 
-All the simulation's data are loaded from external JSON files, found within the `./data` directory. Two JSON files are loaded and parsed, i.e. `_constants.json` and any other JSON file with astronomical data.
+All the simulation's data are loaded from external JSON files, found within the `./data` directory. Two JSON files are loaded and parsed, i.e. `constants.json` and any other JSON file with astronomical data.
 
-The user is encouraged to manipulate `_constants.json`'s data to fit their preferences. Currently, it is is expected to have the following structure:
+The user is encouraged to manipulate `constants.json`'s data to fit their preferences. Currently, it is is expected to have the following structure:
 
 ```json
 {
@@ -127,10 +127,21 @@ The user is encouraged to manipulate `_constants.json`'s data to fit their prefe
 }
 ```
 
-The second JSON file that contains the astronomical system's data (e.g. `the_solar_system.json`) is expected to comprise of a single array of objects under the **"Astronomical Objects"** key. The array's elements specify each astronomical object found within the system, as well as its parameters which are `name`, `radius` (AU), `lin_velocity` (AU/h), `parent`, `parent_dist` (AU), `solar_tilt` (degrees) and `color`. For more information on those fields, refer to the [StellarObject class](#stellarobject).
+The second JSON file that contains the astronomical system's data (e.g. `./data/the_solar_system/data.json`) is expected to comprise of a single array of objects under the **"Astronomical Objects"** key. The array's elements specify each astronomical object found within the system, as well as its parameters which are:
+* `name`
+* `radius` (AU)
+* `orbit_period` (days)
+* `lin_velocity` (AU/h)
+* `parent`
+* `parent_dist` (AU),
+* `solar_tilt` (deg)
+* `day_period` (h)
+* `color`.
+
+For more information on those fields, refer to the [StellarObject class](#stellarobject).
 
 
-**Note:** The simulation data should not be confused with user input data. While "simulation data" are also inpute data, the term "user input" refers to keyboard and mouse input for interacting with the simulation.
+**Note:** The simulation data should not be confused with user input data. While "simulation data" are also input data, the term "user input" refers to keyboard and mouse input for interacting with the simulation.
 
 <br>
 
@@ -155,7 +166,17 @@ The second JSON file that contains the astronomical system's data (e.g. `the_sol
 
 ### IV. Interaction
 
-*TODO: write documentation*
+* **Camera Movement (available on free-fly mode):** `W`/`S` keys (hold) for moving forwards/backwards along the camera's orientation vector; `A`/`D` keys (hold) for moving along the camera's left/right torso vector; `X`/`SPACE` keys (hold) for moving vertically up/down along the y axis.
+
+* **Camera Orientation:** Mouse movement.
+
+* **Heads-Up Display:** `H` key (trigger) for opening and closing the HUD which lists diagnostic information about time, position, etc.
+
+* **Menus:** `P` key (trigger) for opening and closing the planets' menu; `ESC` key (trigger) for opening and closing the main menu; Up/Down arrow keys for navigating the menus' options; `ENTER` key for selecting the current menu option.
+
+    * **Planet Menu:** Lists the names of all loaded astronomical objects. By pressing `ENTER` on an object's name, the camera enters its *locked* mode and follows the chosen astronomical object along its trajectory at a fixed distance from it.
+
+    * **Main Menu:** Lists different options such as *free-fly* mode which unlocks the camera from the chosen astronomical object, and *Exit* which terminates the program.
 
 <br>
 
@@ -165,7 +186,7 @@ This subsection provides an in-depth explanation of the program's modules of imp
 
 <a id="customtypes"></a>
 
-* `CustomTypes.h`:
+* `CustomTypes.h`: This header file includes definitions of custom types and certain utility functions. 
 
 
 <a id="stellarobject"></a>

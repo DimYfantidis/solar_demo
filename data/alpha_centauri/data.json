@@ -2,13 +2,69 @@
     "Astronomical Objects" : [
 
         {
-            "name" : "", 
+            "name" : "[WORLD_CENTRE]", 
             "radius" : 0.01,
             "orbit_period" : null,
             "parent" : null,
             "parent_dist" : null,
             "solar_tilt" : 0.0,
+            "day_period" : 1.0,
             "color" : [0, 0, 0]
+        },
+
+        {
+            "name" : "[AB_BARICENTRE]", 
+            "radius" : 0.01,
+            "orbit_period" : 100000000000.0,
+            "parent" : "[WORLD_CENTRE]",
+            "parent_dist" : 2.0,
+            "solar_tilt" : 0.0,
+            "day_period" : 1.0,
+            "color" : [0, 0, 0]
+        },
+
+        {
+            "name" : "[PROXIMA_BARICENTRE]", 
+            "radius" : 0.01,
+            "orbit_period" : 100000000000.0,
+            "parent" : "[WORLD_CENTRE]",
+            "parent_dist" : 3.0,
+            "solar_tilt" : 0.0,
+            "day_period" : 1.0,
+            "color" : [0, 0, 0]
+        },
+
+        {
+            "name" : "Rigil Kentaurus", 
+            "radius" : 0.005667152520507099,
+            "orbit_period" : 1.0,
+            "parent" : "[AB_BARICENTRE]",
+            "parent_dist" : 5.0,
+            "solar_tilt" : 0.0,
+            "day_period" : 1.0,
+            "color" : [255, 255, 0]
+        },
+
+        {
+            "name" : "Toliman", 
+            "radius" : 0.003998891770322504,
+            "orbit_period" : 2.0,
+            "parent" : "Rigil Kentaurus",
+            "parent_dist" : 1.0,
+            "solar_tilt" : 0.0,
+            "day_period" : 1.0,
+            "color" : [255, 95, 0]
+        },
+
+        {
+            "name" : "Proxima", 
+            "radius" : 0.0006982118095080615,
+            "orbit_period" : 3.0,
+            "parent" : "[PROXIMA_BARICENTRE]",
+            "parent_dist" : 5.0,
+            "solar_tilt" : 0.0,
+            "day_period" : 1.0,
+            "color" : [255, 30, 0]
         }
         
     ]

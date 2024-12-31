@@ -2,12 +2,10 @@ from sys import argv
 from platform import system as pl_system
 from PIL import Image
 
-
 import os
 import stat
 import shutil
 import subprocess
-import numpy as np
 
 
 HELP_MESSAGE = """
@@ -28,7 +26,24 @@ HELP_MESSAGE = """
                      ./data/*.json. If unsure on what to load, use "/planets:the_solar_system" where the astronomical 
                      system's data that will be used are situated in ./data/the_solar_system.json. Read the 
                      documentation's "JSON data" subsection under the "Implementation" section for more details.
+                     
+< ---------------------------------------------- <  User Controls  > --------------------------------------------- >
+
+    * W, A, S, D (hold):    Standard camera movement controls, relative to its orientation (FWD, BCK, LFT, RGT).
+    
+    * Spacebar (hold):      Move camera upwards, along the y axis.
+    
+    * X (hold):             Move camera downwards, along the y axis.
+    
+    * ESC (toggle):         Open/Close the main menu.
+    
+    * P (toggle):           Open/Close the Planets' menu.
+    
+    * H (toggle):           Open/Close the HUD for diagnostic information.
+    
+For more details on user input and interaction, go to the "Interaction" section of the documentation.
 """
+
 
 def onerror_handler(func, path: str, exc_info):
     """
@@ -38,7 +53,7 @@ def onerror_handler(func, path: str, exc_info):
     it attempts to add write permission and then retries.
 
     If the error is for another reason it re-raises the error.
-    
+
     Usage : `shutil.rmtree(path, onerror=onerror)`
     """
     # Is the error an access error?
@@ -72,7 +87,7 @@ def execute_binaries_msvc(sln_dir_abs: str, sln_name: str) -> bool:
     except subprocess.CalledProcessError as e:
         print(e)
         return False
-    
+
     return True
 
 

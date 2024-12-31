@@ -14,7 +14,7 @@ bool registerTexture(const char* filename, GLuint* textureID)
     unsigned int width;
     unsigned int height;
 
-    ubyte* image = loadBitmapToRGBArray(filename, &width, &height, false);
+    ubyte_t* image = loadBitmapToRGBArray(filename, &width, &height, false);
 
     // TODO: improve error handling
     if (image == NULL) 

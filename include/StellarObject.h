@@ -133,14 +133,14 @@ StellarObject* initStellarObject(
 
 StellarObject* coloriseStellarObject3f(StellarObject* p, float red, float green, float blue)
 {
-    p->color[0] = (ubyte)(red * 255);
-    p->color[1] = (ubyte)(green * 255);
-    p->color[2] = (ubyte)(blue * 255);
+    p->color[0] = (ubyte_t)(red * 255);
+    p->color[1] = (ubyte_t)(green * 255);
+    p->color[2] = (ubyte_t)(blue * 255);
     
     return p;
 }
 
-StellarObject* coloriseStellarObject3ub(StellarObject* p, ubyte red, ubyte green, ubyte blue)
+StellarObject* coloriseStellarObject3ub(StellarObject* p, ubyte_t red, ubyte_t green, ubyte_t blue)
 {
     p->color[0] = red;
     p->color[1] = green;
@@ -322,12 +322,15 @@ unsigned int generateStellarObjectTrajectoryDisplayList()
     return listId;
 }
 
+// Returns an array of the astronomical objects, along with its size.
+// The `data_dir` function parameter is specified by the `/planets:*` program argument.
 StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
 {
     StellarObject** destArray;
 
     *arraySize = 0;
 
+    // The stellarObjects' JSON data file.
     char* json_filename = strCat(2, data_dir, "data.json");
 
     // open the JSON file 
@@ -339,7 +342,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
         return NULL;
     } 
 
-    // read the file contents into a string 
+    // Read the file contents into a string 
     const size_t JSON_BUFFER_SIZE = 1024 * 1024;
 
     char* buffer = (char *)malloc(JSON_BUFFER_SIZE * sizeof(char));
@@ -530,7 +533,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
                     (real_t)day_period->valuedouble
                 ),
 
-                (ubyte)r->valueint, (ubyte)g->valueint, (ubyte)b->valueint
+                (ubyte_t)r->valueint, (ubyte_t)g->valueint, (ubyte_t)b->valueint
             )
         );
 
