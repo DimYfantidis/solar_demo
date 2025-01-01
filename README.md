@@ -117,13 +117,15 @@ The user is encouraged to manipulate `constants.json`'s data to fit their prefer
 ```json
 {
     "window_dimensions" : {
-        "width" : 2560,
-        "height" : 1440
+        "width" : <int_value>,
+        "height" : <int_value>
     },
 
-    "fullscreen" : true,
+    "fullscreen" : <boolean_value>,
 
-    "framerate" : 144.0
+    "sky_texture" : <boolean_value>,
+
+    "framerate" : <float_value>
 }
 ```
 
@@ -159,7 +161,15 @@ For more information on those fields, refer to the [StellarObject class](#stella
 
 ### III. Build Automation
 
-*TODO: write documentation*
+The [setup.py](./setup.py) script is designed to automate the project's **building** and **execution**, the **downloading**, **building** and **linking** of external dependencies, as well as the proper **formatting** of input data and folder structure; all with the use of its simple command line arguments.
+
+* **Dependencies:** The dependencies mentioned in the [previous section](#ii-dependencies) do not come along with the project in the form of pre-compiled binaries. On the contrary, the project's file structure is dynamically changed as they are downloaded from their respective github repos. The script then automatically compiles, builds and links them to the core project through designated shell commands.
+
+* **Data Formatting:** Textures are converted automatically from JPEG format to BMP format using the [Pillow](https://pypi.org/project/pillow/) module. This is more profitable than either storing them as in BMP format online or creating/integrating a custom implementation for parsing JPEG data.
+
+    The textures are saved in JPEG format under `./data/*/` for efficiency, but creating a custom implementation for parsing JPEG images in C is a very complicated process. Also, integrating a custom implementation just introduces unecessary dependencies, and thus complexity to the project. On the other hand, an implementation for loading bitmap images was relatively straightforward to implement, but images are not stored in BMP format due to their large size. Thus, the Pillow module serves to strike a balance between the two options in this scenario.
+
+* **Program Building/Running:** As mentioned in the [Setup](#setup) section, the script serves as a wrapper for the main program, managing the building and running process, as well as specifying the program's input data through designated terminal arguments.
 
 <br>
 
@@ -169,6 +179,8 @@ For more information on those fields, refer to the [StellarObject class](#stella
 * **Camera Movement (available on free-fly mode):** `W`/`S` keys (hold) for moving forwards/backwards along the camera's orientation vector; `A`/`D` keys (hold) for moving along the camera's left/right torso vector; `X`/`SPACE` keys (hold) for moving vertically up/down along the y axis.
 
 * **Camera Orientation:** Mouse movement.
+
+* **Camera Speed:** Roll mousewheel Up/Down to increase/decrease camera movement speed.
 
 * **Heads-Up Display:** `H` key (trigger) for opening and closing the HUD which lists diagnostic information about time, position, etc.
 
@@ -186,7 +198,7 @@ This subsection provides an in-depth explanation of the program's modules of imp
 
 <a id="customtypes"></a>
 
-* `CustomTypes.h`: This header file includes definitions of custom types and certain utility functions. 
+* `CustomTypes.h`: This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essentioal high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
 
 
 <a id="stellarobject"></a>

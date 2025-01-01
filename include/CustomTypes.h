@@ -46,13 +46,13 @@ float clampf(float x, float lo, float hi)
     return (x < lo ? lo : (x > hi ? hi : x));
 }
 
-char* strBuild(const char* org)
+char* strBuild(const char* originalString)
 {
-    size_t strLength = strlen(org);
+    size_t strLength = strlen(originalString);
 
-    char* copy  = (char *)malloc((strLength + 1) * sizeof(char));
+    char* copy = (char *)malloc((strLength + 1) * sizeof(char));
 
-    strcpy(copy, org);
+    strncpy(copy, originalString, strLength);
 
     copy[strLength] = '\0';
 
@@ -126,6 +126,7 @@ size_t getFileSizeInBytes(const char* filename)
     return size;
 }
 
+
 /* Performs matrix multiplication. It is considered that the input and output matrices
  * are allocated on the stack as float[][] and not as float**. Thus they must be flattened
  * by casting them to float* before passing them as arguments.
@@ -154,7 +155,7 @@ void matrixMultiplication(real_t* prod, const real_t* A, const real_t* B, size_t
 
 
 // Routine for redirection to external address.
-int openBrowserAt(const char* address)
+int openBrowserAt(const char* hyperlink)
 {
     int commandExitCode = -1;
 
@@ -164,14 +165,14 @@ int openBrowserAt(const char* address)
 #if defined(_WIN32) || defined(__CYGWIN__)
 
     // First attempt to open the page on the default browser.
-    snprintf(cmdBuffer, sizeof(cmdBuffer), "rundll32 url.dll,FileProtocolHandler %s", address);
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "rundll32 url.dll,FileProtocolHandler %s", hyperlink);
     commandExitCode = system(cmdBuffer);
 
     if (commandExitCode == EXIT_SUCCESS)
         return commandExitCode;
 
     // Second attempt to open web page on MS Edge.
-    snprintf(cmdBuffer, sizeof(cmdBuffer), "START msedge %s", address);
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "START msedge %s", hyperlink);
     commandExitCode = system(cmdBuffer);
 
 // Linux Case
@@ -179,20 +180,20 @@ int openBrowserAt(const char* address)
 
     // First attempt to open the page on the default browser using the xgd-open tool
     // from the xdg-utils package, which is commonly installed on most Linux distributions.
-    snprintf(cmdBuffer, sizeof(cmdBuffer), "xdg-open %s", address);
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "xdg-open %s", hyperlink);
     commandExitCode = system(cmdBuffer);
 
     if (commandExitCode == EXIT_SUCCESS)
         return commandExitCode;
 
     // Second attempt to open the web page, in case xgd-utils package is not installed.
-    snprintf(cmdBuffer, sizeof(cmdBuffer), "firefox %s", address);
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "firefox %s", hyperlink);
     commandExitCode = system(cmdBuffer);
 
 // Mac OS X case
 #elif defined(__APPLE__) || defined(__MACH__)
     
-    snprintf(cmdBuffer, sizeof(cmdBuffer), "open %s", address);
+    snprintf(cmdBuffer, sizeof(cmdBuffer), "open %s", hyperlink);
     commandExitCode = system(cmdBuffer);
 
 #endif

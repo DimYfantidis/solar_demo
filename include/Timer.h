@@ -15,13 +15,14 @@
 #include "CustomTypes.h"
 
 
-struct Timer
+typedef struct Timer
 {
     char* name;
+
     uint64_t start;
     uint64_t stop;
-};
-typedef struct Timer Timer;
+
+}Timer;
 
 
 uint64_t getAbsoluteTimeMillis()
@@ -74,9 +75,9 @@ void endTimer(Timer* timer)
     duration_h = duration_min / 60;
     duration_min = duration_min % 60;
 
-    // Convert and print the elpased time as milliseconds.
+    // Format and print the elpased time in a clean and readable manner.
     printf(
-        "Process \"%s\" finished after %02zuh : %02zumin : %02zusec : %03zums\n", 
+        "Process \"%s\" finished after %02"PRIu64"h : %02"PRIu64"min : %02"PRIu64"sec : %03"PRIu64"ms\n", 
         timer->name, 
         duration_h,
         duration_min,
@@ -84,6 +85,7 @@ void endTimer(Timer* timer)
         duration_ms
     );
 
+    // Deallocate resources.
     free(timer->name);
     free(timer);
 }
@@ -104,7 +106,7 @@ void getTimeFormatStringFromMillis(char* buffer, size_t buffer_size, uint64_t du
 
     duration_h = duration_min / 60;
     duration_min = duration_min % 60;
-    
+
     duration_days = duration_h / 24;
     duration_h = duration_h % 24;
 
