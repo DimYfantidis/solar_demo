@@ -194,11 +194,11 @@ The [setup.py](./setup.py) script is designed to automate the project's **buildi
 
 ### V. Classes
 
-This subsection provides an in-depth explanation of the program's modules of implementation that are found within the `./include` directory.
+This subsection provides an extended explanation of the program's modules of implementation that are found within the `./include` directory. For in-depth analysis of the modules' implementation, feel free to take a look within the designated header files' source code.
 
 <a id="customtypes"></a>
 
-* `CustomTypes.h`: This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essentioal high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
+* `CustomTypes.h`: This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essential high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
 
 
 <a id="stellarobject"></a>
@@ -208,7 +208,7 @@ This subsection provides an in-depth explanation of the program's modules of imp
 
 <a id="camera"></a>
 
-* `Camera.h`:
+* `Camera.h`: Functions as a high-level API for managing the first-person player view and its variations based on user input. Encapsulates low-level OpenGL API code such as the manipulation of the projection matrix through `gluPerspective` and `gluLookAt`, and manipulating the camera's position and orientation using appropriate conditionals. 
 
 
 <a id="ambientstars"></a>
