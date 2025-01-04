@@ -154,7 +154,7 @@ void renderStars(AmbientStars* stars)
     else
     {
         // High Resolution Sky rendering.   
-        glColor3f(0.3f, 0.3f, 0.3f);
+        glColor3f(1.0f, 1.0f, 1.0f);
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, stars->texture);

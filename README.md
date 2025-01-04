@@ -49,19 +49,17 @@
 
     5. [Classes](#v-classes)
 
-        1. [CustomTypes](#customtypes)
-
-        2. [StellarObject](#stellarobject)
+        1. [AmbientStars](#ambientstars)
 
         3. [Camera](#camera)
 
-        4. [AmbientStars](#ambientstars)
+        4. [CustomTypes](#customtypes)
 
         5. [MenuScreen](#menuscreen)
 
-        6. [TextRendering](#textrendering)
+        6. [StellarObject](#stellarobject)
 
-        7. [HeadsUpDisplay](#headsupdisplay)
+        7. [TextRendering](#textrendering)
 
         8. [Timer](#timer)
 
@@ -94,9 +92,9 @@ This project demands the existence of a base **Python3** interpeter, **CMake ver
     ``` 
     python setup.py -build-depend -build-proj -run /planets:the_solar_system
     ```
-    The `setup.py` script automatically creates and handle's the project's file structure, downloads and compiles [dependencies](#ii-dependencies), links them to the project, compiles the project and executes the generated executable with the `/planets:*` command line argument.
+    The `setup.py` script automatically creates and handle's the project's file structure, downloads and compiles [dependencies](#ii-dependencies), links them to the project, compiles the project and executes the generated executable with the `/planets:<SOLAR-DIR>` command line argument.
 
-    For more information on the build automation python script, refer to the [Build Automation](#iii-build-automation) subsection or type (within the repo's dir):
+    For more information on the build automation python script, refer to the [Build Automation](#iii-build-automation) subsection as well as the script's instruction using:
     ```
     python setup.py -help
     ```
@@ -196,14 +194,13 @@ The [setup.py](./setup.py) script is designed to automate the project's **buildi
 
 This subsection provides an extended explanation of the program's modules of implementation that are found within the `./include` directory. For in-depth analysis of the modules' implementation, feel free to take a look within the designated header files' source code.
 
-<a id="customtypes"></a>
+<a id="ambientstars"></a>
 
-* **`CustomTypes.h`:** This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essential high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
+* **`AmbientStars.h`:** Used for rendering the skybox which can either be textured or not. The skybox consists of a single sphere, with the camera in its centre and radius $\simeq$ render distance. Skybox texturing is controlled by the `sky_texture` boolean value within `./data/constants.json`.
 
+    * **Textured Skybox:** Loads the `SKYBOX.bmp` image (found in the astronomical systems directory) and wraps it around the aforementioned sphere.
 
-<a id="stellarobject"></a>
-
-* **`StellarObject.h`:**
+    * **Non-textured Skybox:** Generates `N` tiny spheres on the skybox's spherical surface to create the illusion of distant stars. Parameter `N` is specified by the user.
 
 
 <a id="camera"></a>
@@ -211,30 +208,26 @@ This subsection provides an extended explanation of the program's modules of imp
 * **`Camera.h`:** Functions as a high-level API for managing the first-person player view and its variations based on user input. Encapsulates low-level OpenGL API code such as the manipulation of the projection matrix through `gluPerspective` and `gluLookAt`, and manipulating the camera's position and orientation using appropriate conditionals. 
 
 
-<a id="ambientstars"></a>
+<a id="customtypes"></a>
 
-* **`AmbientStars.h`:** Used for rendering the skybox which can either be textured or not. The skybox consists of a single sphere, with the camera in its centre and radius $\simeq$ render distance. Skybox texturing is controlled by the `sky_texture` boolean value within `./data/constants.json`.
-
-    * **Textured Skybox:** loads the `SKYBOX.bmp` image (found in the astronomical systems directory) and wraps it around the aforementioned sphere.
-
-    * **Non-textured Skybox:** generates `N` tiny spheres on the skybox's spherical surface to create the illusion of distant stars. Parameter `N` is specified by the user.
+* **`CustomTypes.h`:** This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essential high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCat`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
 
 
 <a id="menuscreen"></a>
 
-* **`MenuScreen.h`:**
+* **`MenuScreen.h`:** Encapsulates the implementation of a menu-like environment. When the menu is open, the user can cycle between its different options and choose one of them, thus extending the program's capabilities/functionalities.
+
+
+<a id="stellarobject"></a>
+
+* **`StellarObject.h`:** Each instance of `struct StellarObject` represents a celestial body. All celestial bodies of the specified system are loaded en masse from their designated JSON file (`./data/<SOLAR-DIR>/data.json`) using the `loadAllStellarObjects` function. 
 
 
 <a id="textrendering"></a>
 
-* **`TextRendering`:**
-
-
-<a id="headsupdisplay"></a>
-
-* **`HeadsUpDisplay.h`:**
+* **`TextRendering`:** Includes the implementations of `renderStringOnScreen` and `renderStringInWorld` functions that abstract the low-level boilerplate code demanded for rendering strings.
 
 
 <a id="timer"></a>
 
-* **`Timer.h`:** used for roughly estimating a code segment's elapsed time from start to finish. `struct Timer` is used solely for debugging purposes, while `getAbsoluteTimeMillis` is essential for core functionalities all accross the project.
+* **`Timer.h`:** Used for roughly estimating a code segment's elapsed time from start to finish. `struct Timer` is used solely for debugging purposes, while `getAbsoluteTimeMillis` is essential for core functionalities all across the project.

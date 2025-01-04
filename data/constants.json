@@ -1,12 +1,12 @@
 {
     "window_dimensions" : {
-        "width" : 2560,
-        "height" : 1440
+        "width" : 1920,
+        "height" : 1080
     },
 
     "fullscreen" : true,
 
     "sky_texture" : true,
 
-    "framerate" : 144.0
+    "framerate" : 60.0
 }
