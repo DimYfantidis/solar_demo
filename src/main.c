@@ -32,38 +32,39 @@
 int window_width;
 int window_height;
 int window_id;
+
 bool fullscreen_enabled;
 
 double framerate;
 
-real_t simulationSpeed;
+real_t simulation_speed;
 
 uint64_t refresh_ts;
 
 StellarObject** stellarObjects;
 
-int numStellarObjects;
+int num_stellar_objects;
 
-unsigned int trajectoryListId; 
+unsigned int trajectory_list_id; 
 
 StellarObject*** cachedAncestors;
-int* numCachedAncestors;
+int* num_cached_ancestors;
 
 Camera* camera;
 
 AmbientStars* starsSkyBox;
 
-bool skyTexture;
+bool enable_sky_texture;
 
-bool enableHUD;
-bool enablePlanetMenu;
-bool enableMainMenu;
+bool enable_hud;
+bool enable_planet_menu;
+bool enable_main_menu;
 
 MenuScreen* mainMenuScreen;
 MenuScreen* planetMenuScreen;
 
-uint64_t simulationElapsedTimeMilliseconds;
-uint64_t realElapsedTimeMilliseconds;
+uint64_t simulation_elapsed_millis;
+uint64_t real_elapsed_millis;
 
 
 void initGlobals(int, char**);
@@ -115,8 +116,8 @@ int main(int argc, char* argv[])
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
     // Initialise the callback function's static variables with the provided arguments.
-    callbackPassiveMotion(windowCentreX, windowCentreY);
-    callbackPassiveMotion(windowCentreX, windowCentreY);
+    callbackPassiveMotion(window_centre_X, window_centre_Y);
+    callbackPassiveMotion(window_centre_X, window_centre_Y);
 
     glutDisplayFunc(display);
     glutKeyboardFunc(callbackKeyboard);
@@ -149,9 +150,9 @@ int main(int argc, char* argv[])
 
 void display(void)
 {
-    keyToggle('H', &enableHUD, 250);
-    keyToggle('P', &enablePlanetMenu, 250);
-    keyToggle(27,  &enableMainMenu, 250);
+    keyToggle('H', &enable_hud, 250);
+    keyToggle('P', &enable_planet_menu, 250);
+    keyToggle(27,  &enable_main_menu, 250);
 
     double elapsed_seconds = (double)(getAbsoluteTimeMillis() - refresh_ts) / 1000.0;
 
@@ -167,40 +168,40 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    camera->movementSpeed *= moveSpeedScaleFactor;
+    camera->movementSpeed *= move_speed_scale_factor;
     updateCamera(camera);
-    moveSpeedScaleFactor = 1.0f;
+    move_speed_scale_factor = 1.0f;
 
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     if (keystrokes['+']) {
-        simulationSpeed *= (real_t)1.05;
+        simulation_speed *= (real_t)1.05;
     }
     if (keystrokes['-']) {
-        simulationSpeed /= (real_t)1.05;
+        simulation_speed /= (real_t)1.05;
     }
 
-    for (int i = 0; i < numStellarObjects; ++i)
+    for (int i = 0; i < num_stellar_objects; ++i)
     {
         // Update celestial body's position after moving 
         // by v * dt, where v is its linear velocity.
-        updateStellarObject(stellarObjects[i], simulationSpeed, (float)elapsed_seconds / 3600.0f);
+        updateStellarObject(stellarObjects[i], simulation_speed, (float)elapsed_seconds / 3600.0f);
         // Render the body as well as its trajectory.
-        renderStellarObject(stellarObjects[i], true, trajectoryListId);
+        renderStellarObject(stellarObjects[i], true, trajectory_list_id);
     }
 
-    camera->movementSpeed *= moveSpeedScaleFactor;
+    camera->movementSpeed *= move_speed_scale_factor;
     updateCamera(camera);
-    moveSpeedScaleFactor = 1.0f;
+    move_speed_scale_factor = 1.0f;
 
     const char* option;
-    int optionIndex;
+    int option_index;
 
-    if (enableMainMenu)
+    if (enable_main_menu)
     {
-        enablePlanetMenu = false;
+        enable_planet_menu = false;
 
         renderMenuScreen(mainMenuScreen);
 
@@ -208,7 +209,7 @@ void display(void)
         {
             if (strcmp(option, "Free-fly") == 0)
                 camera->anchor = NULL;
-            
+
             else if (strcmp(option, "Help") == 0)
             {
                 static const char help_page[] = "https://github.com/DimYfantidis/solar_demo?tab=readme-ov-file#iv-interaction";
@@ -232,60 +233,60 @@ void display(void)
                 return;
             }
 
-            enableMainMenu = false;
+            enable_main_menu = false;
         }
     }
-    if (enablePlanetMenu)
+    if (enable_planet_menu)
     {
         renderMenuScreen(planetMenuScreen);
 
-        if ((option = menuScreenHandler(planetMenuScreen, &optionIndex)) != NULL)
+        if ((option = menuScreenHandler(planetMenuScreen, &option_index)) != NULL)
         {
-            camera->anchor = stellarObjects[optionIndex];
-            enablePlanetMenu = false;
+            camera->anchor = stellarObjects[option_index];
+            enable_planet_menu = false;
         }
     }
 
     renderStars(starsSkyBox);
 
 
-    static char timeFormatBuffer[1024];
+    static char time_format_buffer[1024];
 
-    simulationElapsedTimeMilliseconds += (uint64_t)(elapsed_seconds * simulationSpeed * 1000);
-    realElapsedTimeMilliseconds += (uint64_t)(elapsed_seconds * 1000);
+    simulation_elapsed_millis += (uint64_t)(elapsed_seconds * simulation_speed * 1000);
+    real_elapsed_millis += (uint64_t)(elapsed_seconds * 1000);
 
-    static char logBuffer[1024];
+    static char hud_buffer[1024];
     
-    if (enableHUD)
+    if (enable_hud)
     {
-        snprintf(logBuffer, sizeof(logBuffer), "FPS: %.2lf", 1 / elapsed_seconds);
-        renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        snprintf(hud_buffer, sizeof(hud_buffer), "FPS: %.2lf", 1 / elapsed_seconds);
+        renderStringOnScreen(0.0, window_height - 15.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
-        snprintf(logBuffer, sizeof(logBuffer), "Camera Position: (%lf, %lf, %lf)", camera->position[0], camera->position[1], camera->position[2]);
-        renderStringOnScreen(0.0, window_height - 30.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Camera Position: (%lf, %lf, %lf)", camera->position[0], camera->position[1], camera->position[2]);
+        renderStringOnScreen(0.0, window_height - 30.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
-        snprintf(logBuffer, sizeof(logBuffer), "Simulation Speed: %.4f", simulationSpeed);
-        renderStringOnScreen(0.0, window_height - 45.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Simulation Speed: %.4f", simulation_speed);
+        renderStringOnScreen(0.0, window_height - 45.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
-        snprintf(logBuffer, sizeof(logBuffer), "Camera Speed: %.4f", camera->movementSpeed);
-        renderStringOnScreen(0.0, window_height - 60.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Camera Speed: %.4f", camera->movementSpeed);
+        renderStringOnScreen(0.0, window_height - 60.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
-        getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), realElapsedTimeMilliseconds);
-        snprintf(logBuffer, sizeof(logBuffer), "Elapsed Real time:    %s", timeFormatBuffer);
-        renderStringOnScreen(0.0, window_height - 90.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        getTimeFormatStringFromMillis(time_format_buffer, sizeof(time_format_buffer), real_elapsed_millis);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Elapsed Real time:    %s", time_format_buffer);
+        renderStringOnScreen(0.0, window_height - 90.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
-        getTimeFormatStringFromMillis(timeFormatBuffer, sizeof(timeFormatBuffer), simulationElapsedTimeMilliseconds);
-        snprintf(logBuffer, sizeof(logBuffer), "Elapsed Virtual time: %s", timeFormatBuffer);
-        renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        getTimeFormatStringFromMillis(time_format_buffer, sizeof(time_format_buffer), simulation_elapsed_millis);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Elapsed Virtual time: %s", time_format_buffer);
+        renderStringOnScreen(0.0, window_height - 105.0f, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
     }
 
-    float pixelOffsetCentre;
+    float pixel_offset_centre;
 
     if (camera->anchor != NULL)
     {
-        snprintf(logBuffer, sizeof(logBuffer), "Press ESC -> \"Free-Fly\" -> ENTER to stop observing %s", camera->anchor->name);
-        pixelOffsetCentre = (float)strlen(logBuffer) / 2.0f;
-        renderStringOnScreen(0.50f * window_width - pixelOffsetCentre * 9.0f, 0.20f * window_height, GLUT_BITMAP_9_BY_15, logBuffer, 0xFF, 0xFF, 0xFF);
+        snprintf(hud_buffer, sizeof(hud_buffer), "Press ESC -> \"Free-Fly\" -> ENTER to stop observing %s", camera->anchor->name);
+        pixel_offset_centre = (float)strlen(hud_buffer) / 2.0f;
+        renderStringOnScreen(0.50f * window_width - pixel_offset_centre * 9.0f, 0.20f * window_height, GLUT_BITMAP_9_BY_15, hud_buffer, 0xFF, 0xFF, 0xFF);
 
         renderStringOnScreen(
             0.50f * window_width - 220.5f, 0.20f * window_height - 20.0f, 
@@ -309,14 +310,14 @@ void initGlobals(int argc, char* argv[])
     window_height = 720;
     framerate = 60.0;
 
-    simulationElapsedTimeMilliseconds = 0;
-    realElapsedTimeMilliseconds = 0;
+    simulation_elapsed_millis = 0;
+    real_elapsed_millis = 0;
 
-    skyTexture = false;
+    enable_sky_texture = false;
 
-    enableHUD = false;
-    enablePlanetMenu = false;
-    enableMainMenu = false;
+    enable_hud = false;
+    enable_planet_menu = false;
+    enable_main_menu = false;
 
     refresh_ts = getAbsoluteTimeMillis();
 
@@ -378,7 +379,7 @@ void initGlobals(int argc, char* argv[])
     
     cJSON *sky_texture = cJSON_GetObjectItemCaseSensitive(json, "sky_texture"); 
     if (cJSON_IsBool(sky_texture))
-        skyTexture = (bool)sky_texture->valueint;
+        enable_sky_texture = (bool)sky_texture->valueint;
 
 
     // delete the JSON object 
@@ -386,17 +387,17 @@ void initGlobals(int argc, char* argv[])
     free(buffer);
 
     // Auxiliary variables for centering the mouse pointer using glutWarpPointer().
-    windowCentreX = window_width / 2;
-    windowCentreY = window_height / 2;
+    window_centre_X = window_width / 2;
+    window_centre_Y = window_height / 2;
 
     // Independent variables for the parametric equation of a sphere.
     // Used for controlling the camera's orientation through mouse movement.
-    CameraAngleHorizontal = .0f;
-    CameraAngleVertical = .0f;
+    camera_angle_horizontal = .0f;
+    camera_angle_vertical = .0f;
 
-    mouseSensitivity = .002f;
+    mouse_sensitivity = .002f;
 
-    simulationSpeed = 1.0f;
+    simulation_speed = 1.0f;
 
     // Used for keyboard input (see KeyboardCallback.h)
     for (int i = 0; i < sizeof(keystrokes) / sizeof(keystrokes[0]); ++i) {
@@ -416,22 +417,22 @@ void initGlobals(int argc, char* argv[])
 
     // ----------- Stellar Objects (BEGIN) ----------- //
 
-    stellarObjects = loadAllStellarObjects(&numStellarObjects, argv[2]);
+    stellarObjects = loadAllStellarObjects(&num_stellar_objects, argv[2]);
 
     if (stellarObjects == NULL)
         exit(EXIT_FAILURE);
 
-    cachedAncestors = (StellarObject ***)malloc(numStellarObjects * sizeof(StellarObject **));
+    cachedAncestors = (StellarObject ***)malloc(num_stellar_objects * sizeof(StellarObject **));
     // Number of ancestors for each celestial body. 
-    numCachedAncestors = (int *)malloc(numStellarObjects * sizeof(int));
+    num_cached_ancestors = (int *)malloc(num_stellar_objects * sizeof(int));
 
-    for (int i = 0; i < numStellarObjects; ++i)
+    for (int i = 0; i < num_stellar_objects; ++i)
     {
-        cachedAncestors[i] = getStellarObjectAncestors(stellarObjects[i], &numCachedAncestors[i]);
+        cachedAncestors[i] = getStellarObjectAncestors(stellarObjects[i], &num_cached_ancestors[i]);
         // printf("%s -> cached: %d\n", stellarObjects[i]->name, numCachedAncestors[i]);
     }
 
-    trajectoryListId = generateStellarObjectTrajectoryDisplayList();
+    trajectory_list_id = generateStellarObjectTrajectoryDisplayList();
 
     // ----------- Stellar Objects (END) ----------- //
     
@@ -444,7 +445,7 @@ void initGlobals(int argc, char* argv[])
 	glPushMatrix();
 	{
 		gluOrtho2D(0.0, (double)window_width, 0.0, (double)window_height);
-		glGetFloatv(GL_PROJECTION_MATRIX, windowMatrix);
+		glGetFloatv(GL_PROJECTION_MATRIX, window_matrix);
 	}
 	glPopMatrix();
 	// ----------- Window Matrix (BEGIN) ----------- //
@@ -452,7 +453,7 @@ void initGlobals(int argc, char* argv[])
 
     mainMenuScreen = setMenuScreenDimensions(
         initMenuScreen(
-            windowMatrix,
+            window_matrix,
             3,
             "Free-fly",
             "Help",
@@ -460,22 +461,20 @@ void initGlobals(int argc, char* argv[])
         ),
         window_width, window_height
     );
-    //setMenuScreenBoxDimensions(mainMenuScreen, 0.12f, 0.04f);
 
     planetMenuScreen = setMenuScreenDimensions(
         initMenuScreenEmpty(
-            windowMatrix, 
-            numStellarObjects
+            window_matrix, 
+            num_stellar_objects
         ),
         window_width, window_height
     );
 
-    for (int i = 0; i < numStellarObjects; ++i) {
+    for (int i = 0; i < num_stellar_objects; ++i) {
         assignMenuScreenElement(planetMenuScreen, i, stellarObjects[i]->name);
     }
-    //setMenuScreenBoxDimensions(planetMenuScreen, 0.07f, 0.03f);
 
-    if (skyTexture)
+    if (enable_sky_texture)
         starsSkyBox = buildStarsFromTexture(argv[2], camera);
     else
         starsSkyBox = buildStars(1000, camera);
@@ -484,7 +483,7 @@ void initGlobals(int argc, char* argv[])
 // Free all dynamically allocated memory and FreeGLUT's resources.
 void deallocateAll(void)
 {
-    for (int i = 0; i < numStellarObjects; ++i)
+    for (int i = 0; i < num_stellar_objects; ++i)
     {
         deleteStellarObject(stellarObjects[i]);
         
@@ -494,7 +493,7 @@ void deallocateAll(void)
     
     free(stellarObjects);
     free(cachedAncestors);
-    free(numCachedAncestors);
+    free(num_cached_ancestors);
 
     deleteCamera(camera);
 

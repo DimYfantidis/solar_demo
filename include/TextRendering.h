@@ -7,7 +7,7 @@
 #include "CustomTypes.h"
 
 
-float windowMatrix[16];
+float window_matrix[16];
 
 
 void renderStringOnScreen(
@@ -21,7 +21,7 @@ void renderStringOnScreen(
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         {
-            glLoadMatrixf(windowMatrix);
+            glLoadMatrixf(window_matrix);
             // glDisable(GL_LIGHTING);
 
             glColor4f(r, g, b, 1.0f);

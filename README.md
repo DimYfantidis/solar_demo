@@ -198,39 +198,43 @@ This subsection provides an extended explanation of the program's modules of imp
 
 <a id="customtypes"></a>
 
-* `CustomTypes.h`: This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essential high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
+* **`CustomTypes.h`:** This header file includes definitions of custom types (e.g. vector types, `byte_t`, etc.) and certain utility functions. "Utility functions" is an umbrella term for functions that offer essential high-level abstraction routines that C does not offer by itself. Some of these include string functions like `strBuild` and `strCar`, `vectorLength*` functions, `openBrowserAt` for opening external hyperlinks to the web browser.
 
 
 <a id="stellarobject"></a>
 
-* `StellarObject.h`:
+* **`StellarObject.h`:**
 
 
 <a id="camera"></a>
 
-* `Camera.h`: Functions as a high-level API for managing the first-person player view and its variations based on user input. Encapsulates low-level OpenGL API code such as the manipulation of the projection matrix through `gluPerspective` and `gluLookAt`, and manipulating the camera's position and orientation using appropriate conditionals. 
+* **`Camera.h`:** Functions as a high-level API for managing the first-person player view and its variations based on user input. Encapsulates low-level OpenGL API code such as the manipulation of the projection matrix through `gluPerspective` and `gluLookAt`, and manipulating the camera's position and orientation using appropriate conditionals. 
 
 
 <a id="ambientstars"></a>
 
-* `AmbientStars.h`:
+* **`AmbientStars.h`:** Used for rendering the skybox which can either be textured or not. The skybox consists of a single sphere, with the camera in its centre and radius $\simeq$ render distance. Skybox texturing is controlled by the `sky_texture` boolean value within `./data/constants.json`.
+
+    * **Textured Skybox:** loads the `SKYBOX.bmp` image (found in the astronomical systems directory) and wraps it around the aforementioned sphere.
+
+    * **Non-textured Skybox:** generates `N` tiny spheres on the skybox's spherical surface to create the illusion of distant stars. Parameter `N` is specified by the user.
 
 
 <a id="menuscreen"></a>
 
-* `MenuScreen.h`:
+* **`MenuScreen.h`:**
 
 
 <a id="textrendering"></a>
 
-* `TextRendering`:
+* **`TextRendering`:**
 
 
 <a id="headsupdisplay"></a>
 
-* `HeadsUpDisplay.h`:
+* **`HeadsUpDisplay.h`:**
 
 
 <a id="timer"></a>
 
-* `Timer.h`:
+* **`Timer.h`:** used for roughly estimating a code segment's elapsed time from start to finish. `struct Timer` is used solely for debugging purposes, while `getAbsoluteTimeMillis` is essential for core functionalities all accross the project.

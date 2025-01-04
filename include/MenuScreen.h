@@ -24,18 +24,16 @@ struct MenuScreen
     char** optionNames;
 
     int currentlySelectedOption;
-
-    float optionBoxWidth;
-    float optionBoxHeight;
 };
 typedef struct MenuScreen MenuScreen;
 
 
-MenuScreen* initMenuScreen(const float* pWindowMatrix, const int n_options, ...)
+// Menu constructor #1 (heap-allocated).
+MenuScreen* initMenuScreen(const float* p_window_matrix, const int n_options, ...)
 {
     MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    m->pWindowMatrix = pWindowMatrix;
+    m->pWindowMatrix = p_window_matrix;
 
     m->numOptions = n_options;
 
@@ -60,11 +58,12 @@ MenuScreen* initMenuScreen(const float* pWindowMatrix, const int n_options, ...)
     return m;
 }
 
-MenuScreen* initMenuScreenEmpty(float* pWindowMatrix, int n_options)
+// Menu constructor #2 (heap-allocated).
+MenuScreen* initMenuScreenEmpty(float* p_window_matrix, int n_options)
 {
     MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
-    m->pWindowMatrix = pWindowMatrix;
+    m->pWindowMatrix = p_window_matrix;
     
     m->numOptions = n_options;
 
@@ -85,13 +84,6 @@ MenuScreen* setMenuScreenDimensions(MenuScreen* m, int width, int height)
 {
     m->screenWidth = width;
     m->screenHeight = height;
-    return m;
-}
-
-MenuScreen* setMenuScreenBoxDimensions(MenuScreen* m, float width, float height)
-{
-    m->optionBoxWidth = width;
-    m->optionBoxHeight = height;
     return m;
 }
 
@@ -166,7 +158,7 @@ void renderMenuScreen(MenuScreen* m)
 
         offset -= .05f;
     }
-    
+
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -175,29 +167,29 @@ void renderMenuScreen(MenuScreen* m)
     glPopMatrix();
 }
 
-const char* menuScreenHandler(MenuScreen* m, int* optionID)
+const char* menuScreenHandler(MenuScreen* m, int* option_id)
 {
-    if (arrowDownLoaded)
+    if (arrow_down_loaded)
     {
         if (m->currentlySelectedOption < m->numOptions - 1)
             m->currentlySelectedOption += 1;
-        arrowDownLoaded = false;
+        arrow_down_loaded = false;
     }
-    if (arrowUpLoaded)
+
+    if (arrow_up_loaded)
     {
         if (m->currentlySelectedOption > 0)
             m->currentlySelectedOption -= 1;
-        arrowUpLoaded = false;
+        arrow_up_loaded = false;
     }
-    
+
     if (keystrokes['\n'] || keystrokes['\f'] || keystrokes['\r'])
     {
-        if (optionID != NULL)
-            *optionID = m->currentlySelectedOption;
-        
+        if (option_id != NULL)
+            *option_id = m->currentlySelectedOption;
         return m->optionNames[m->currentlySelectedOption];
     }
-    
+
     return NULL;
 }
 

@@ -14,8 +14,8 @@ bool shift_key_down = false;
 bool ctrl_key_down = false;
 bool alt_key_down = false;
 
-bool arrowDownLoaded = false;
-bool arrowUpLoaded = false;
+bool arrow_down_loaded = false;
+bool arrow_up_loaded = false;
 
 
 void callbackKeyboard(unsigned char key, int x, int y)
@@ -47,34 +47,34 @@ void callbackSpecialKeyboard(int key, int x, int y)
         cooldown_ts = current_ms;
 
         if (key == GLUT_KEY_DOWN)
-            arrowDownLoaded = true;
+            arrow_down_loaded = true;
         
         if (key == GLUT_KEY_UP)
-            arrowUpLoaded = true;
+            arrow_up_loaded = true;
     }
 }
 
 
 // When the specified key is pressed, the boolean variable alternates between true and false every `timeout_ms` milliseconds.
-void keyToggle(char key, bool* toggleVar, uint64_t timeout_ms)
+void keyToggle(char key, bool* toggle_var, uint64_t timeout_ms)
 {
     static bool initialised = false;
-    static uint64_t timestampPrev[256];
+    static uint64_t timestamp_prev[256];
 
     if (!initialised)
     {
-        for (int i = 0; i < sizeof(timestampPrev) / sizeof(timestampPrev[0]); ++i)
-            timestampPrev[i] = 0;
+        for (int i = 0; i < sizeof(timestamp_prev) / sizeof(timestamp_prev[0]); ++i)
+            timestamp_prev[i] = 0;
         
         initialised = true;
     }
 
-    uint64_t elapsed_ms = getAbsoluteTimeMillis() - timestampPrev[key];
+    uint64_t elapsed_ms = getAbsoluteTimeMillis() - timestamp_prev[key];
 
     if (keystrokes[key] && elapsed_ms >= timeout_ms)
     {
-        timestampPrev[key] = getAbsoluteTimeMillis();
-        *toggleVar = !(*toggleVar);
+        timestamp_prev[key] = getAbsoluteTimeMillis();
+        *toggle_var = !(*toggle_var);
     }
 }
 

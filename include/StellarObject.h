@@ -400,8 +400,8 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
             return NULL;
         }
 
-        static const char* errorFieldMessage = "Error: JSON array idx.#%d - StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
-        char* errorField = NULL;
+        static const char* error_field_message = "Error: JSON array idx.#%d - StellarObject's `%s` field is invalid; Inspect \"%s\".\n";
+        char* error_field = NULL;
 
 
         cJSON *name = cJSON_GetObjectItemCaseSensitive(iterator, "name");
@@ -415,35 +415,35 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
 
 
         if (!cJSON_IsString(name) || name->valuestring == NULL)
-            errorField = strBuild("name");
+            error_field = strBuild("name");
 
         else if (!cJSON_IsNumber(radius))
-            errorField = strBuild("radius");
+            error_field = strBuild("radius");
 
         else if (!cJSON_IsNumber(orbit_period) && !cJSON_IsNull(orbit_period))
-            errorField = strBuild("orbit_period");
+            error_field = strBuild("orbit_period");
 
         else if (!cJSON_IsString(parent) && !cJSON_IsNull(parent))
-            errorField = strBuild("parent");
+            error_field = strBuild("parent");
 
         else if (!cJSON_IsNumber(parent_dist) && !cJSON_IsNull(parent_dist))
-            errorField = strBuild("parent_dist");
+            error_field = strBuild("parent_dist");
 
         else if (!cJSON_IsNumber(solar_tilt))
-            errorField = strBuild("solar_tilt");
+            error_field = strBuild("solar_tilt");
 
         else if (!cJSON_IsArray(color) || (cJSON_GetArraySize(color) != 3))
-            errorField = strBuild("color");
+            error_field = strBuild("color");
 
         else if (!cJSON_IsNumber(day_period))
-            errorField = strBuild("day_period");
+            error_field = strBuild("day_period");
 
 
-        if (errorField != NULL)
+        if (error_field != NULL)
         {
-            fprintf(stderr, errorFieldMessage, *arraySize, errorField, json_filename);
+            fprintf(stderr, error_field_message, *arraySize, error_field, json_filename);
             free(destArray);
-            free(errorField);
+            free(error_field);
             return NULL;
         }
 
@@ -456,7 +456,7 @@ StellarObject** loadAllStellarObjects(int* arraySize, const char* data_dir)
                 json_filename
             );
             free(destArray);
-            free(errorField);
+            free(error_field);
             return NULL;
         }
 

@@ -2,17 +2,17 @@
 #define MOUSE_WHEEL_CALLBACK_H
 
 
-float moveSpeedScaleFactor = 1.0f;
+float move_speed_scale_factor = 1.0f;
 
 void callbackMouseWheel(int button, int dir, int x, int y)
 {
     if (dir > 0)
     {
-        moveSpeedScaleFactor *= 1.05f;
+        move_speed_scale_factor *= 1.05f;
     }
     else
     {
-        moveSpeedScaleFactor /= 1.05f;
+        move_speed_scale_factor /= 1.05f;
     }
 }
 

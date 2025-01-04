@@ -9,23 +9,32 @@
 #include "PassiveMotionCallback.h"
 
 
+// Documentation:
+// - IV. Interaction: https://github.com/DimYfantidis/solar_demo?tab=readme-ov-file#iv-interaction
+// - V. Classes@Camera: https://github.com/DimYfantidis/solar_demo?tab=readme-ov-file#camera
 typedef struct Camera
 {
+    // 3D coordinate vector of the camera's coordinates relative to the global coordinate system.
     vector3r position;
 
+    // Unary orientation vector for specifying the camera's gaze direction.
     vector3r lookAt;
 
+    // Necessary for `gluLookAt`.
     vector3r upVector;
 
     real_t movementSpeed;
 
     real_t renderDistance;
 
+    // Non-null value implies the camera is in locked mode, i.e. observes the pointed astronomical 
+    // object without freedom of movement (check "IV. Interaction" section in documentation).
     StellarObject* anchor;
     
 } Camera;
 
 
+// Camera constructor (heap-allocated).
 Camera* initCamera(
     double pos_x, double pos_y, double pos_z,
     double ori_x, double ori_y, double ori_z,
@@ -62,16 +71,18 @@ Camera* initCamera(
     return camera;
 }
 
+
+// Listens for events to update camera position and orientation, and modifies GLUT's projection matrix.
 void updateCamera(Camera* camera)
 {
     glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     gluPerspective(60.0, 16.0 / 9.0, 0.01, (double)camera->renderDistance);
 
-    double sin_vert = sin((double)CameraAngleVertical);
-	double sin_horz = sin((double)CameraAngleHorizontal);
-	double cos_vert = cos((double)CameraAngleVertical);
-	double cos_horz = cos((double)CameraAngleHorizontal);
+    double sin_vert = sin((double)camera_angle_vertical);
+	double sin_horz = sin((double)camera_angle_horizontal);
+	double cos_vert = cos((double)camera_angle_vertical);
+	double cos_horz = cos((double)camera_angle_horizontal);
 
     // Camera direction, defined by the unary sphere.
     camera->lookAt[0] = (real_t)(cos_vert * sin_horz);

@@ -12,7 +12,7 @@
 
 
 // bmp file header 
-struct tagBitmapFileHeader {
+struct TagBitmapFileHeader {
 
 #ifdef _MSC_VER
     #pragma pack(push, 1)
@@ -37,7 +37,7 @@ struct tagBitmapFileHeader {
 ;
 
 // bmp extra file header
-struct tagBitmapInfoHeader {
+struct TagBitmapInfoHeader {
     
 #ifdef _MSC_VER
     #pragma pack(push, 1)
@@ -70,15 +70,18 @@ struct tagBitmapInfoHeader {
 #endif
 ;
 
-typedef struct tagBitmapInfoHeader BitmapInfoHeader;
-typedef struct tagBitmapFileHeader BitmapFileHeader;
+typedef struct TagBitmapInfoHeader BitmapInfoHeader;
+typedef struct TagBitmapFileHeader BitmapFileHeader;
 
 
 ubyte_t* loadBitmapToRGBArray(const char* filename, unsigned int* width, unsigned int* height, bool debug)
 {
     FILE* fp;
+
     unsigned int x, y;
+
     BitmapFileHeader bmfh;
+    
     BitmapInfoHeader bmih;
 
 
