@@ -66,6 +66,10 @@ def onerror_handler(func, path: str, exc_info):
 
 def execute_binaries_msvc(sln_dir_abs: str, sln_name: str) -> bool:
 
+    if os.path.exists(f"./build/Release/{sln_name}.dll"):
+        print(f"Warning: Dependency \"{sln_name}\" has already been built; `--build-depend` is ignored.")
+        return True
+
     # Build FreeGLUT from source using the generated solution and MSVC
     command = "cmd.exe /c vcvarsall.bat x64 && "
     command += f"cd {sln_dir_abs} && "

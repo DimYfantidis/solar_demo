@@ -329,13 +329,13 @@ void initGlobals(int argc, char* argv[])
         fprintf(stderr, "Error: Unable to open the JSON file.\n"); 
         exit(EXIT_FAILURE);
     }
-
+ 
     // Read the file contents into a string 
     const size_t JSON_BUFFER_SIZE = 1024 * 1024;
 
     char* buffer = (char *)malloc(JSON_BUFFER_SIZE * sizeof(char));
 
-    size_t len = fread(buffer, 1, JSON_BUFFER_SIZE, fp);
+    fread(buffer, 1, JSON_BUFFER_SIZE, fp);
 
     fclose(fp); 
 
@@ -375,7 +375,6 @@ void initGlobals(int argc, char* argv[])
     cJSON *fps = cJSON_GetObjectItemCaseSensitive(json, "framerate"); 
     if (cJSON_IsNumber(fps))
         framerate = fps->valuedouble;
-
     
     cJSON *sky_texture = cJSON_GetObjectItemCaseSensitive(json, "sky_texture"); 
     if (cJSON_IsBool(sky_texture))

@@ -3,9 +3,14 @@
 
 #if defined(_MSC_VER) && !defined(_USE_MATH_DEFINES)
 #   define _USE_MATH_DEFINES
-#endif 
+#endif
+
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#   define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include <math.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
