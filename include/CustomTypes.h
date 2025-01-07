@@ -10,6 +10,7 @@
 #endif
 
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -51,15 +52,15 @@ float clampf(float x, float lo, float hi)
     return (x < lo ? lo : (x > hi ? hi : x));
 }
 
-char* strBuild(const char* originalString)
+char* strBuild(const char* original_string)
 {
-    size_t strLength = strlen(originalString);
+    size_t str_length = strlen(original_string);
 
-    char* copy = (char *)malloc((strLength + 1) * sizeof(char));
+    char* copy = (char *)malloc((str_length + 1) * sizeof(char));
 
-    strcpy(copy, originalString);
+    strcpy(copy, original_string);
 
-    copy[strLength] = '\0';
+    copy[str_length] = '\0';
 
     return copy;
 }

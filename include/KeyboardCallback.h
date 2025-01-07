@@ -10,15 +10,30 @@
 
 
 bool keystrokes[256];
-bool shift_key_down = false;
-bool ctrl_key_down = false;
-bool alt_key_down = false;
+bool shift_key_down;
+bool ctrl_key_down;
+bool alt_key_down;
 
-bool arrow_down_loaded = false;
-bool arrow_up_loaded = false;
+bool arrow_down_loaded;
+bool arrow_up_loaded;
 
 
-void callbackKeyboard(unsigned char key, int x, int y)
+void initModuleKeyboardCallback(void)
+{
+    shift_key_down = false;
+    ctrl_key_down = false;
+    alt_key_down = false;
+
+    arrow_down_loaded = false;
+    arrow_up_loaded = false;
+
+    // Used for keyboard input
+    for (int i = 0; i < sizeof(keystrokes) / sizeof(keystrokes[0]); ++i)
+        keystrokes[i] = false;
+}
+
+
+void callbackKeyboardDown(unsigned char key, int x, int y)
 {
     int modifiers = glutGetModifiers();
 

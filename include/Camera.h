@@ -6,7 +6,7 @@
 #include "CustomTypes.h"
 #include "StellarObject.h"
 #include "KeyboardCallback.h"
-#include "PassiveMotionCallback.h"
+#include "MotionCallback.h"
 
 
 // Documentation:
@@ -47,7 +47,7 @@ Camera* initCamera(
     camera->position[0] = (real_t)pos_x;
     camera->position[1] = (real_t)pos_y;
     camera->position[2] = (real_t)pos_z;
-    
+
     camera->lookAt[0] = (real_t)ori_x;
     camera->lookAt[1] = (real_t)ori_y;
     camera->lookAt[2] = (real_t)ori_z;

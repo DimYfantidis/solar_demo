@@ -12,7 +12,7 @@
 #include "KeyboardCallback.h"
 
 
-struct MenuScreen
+typedef struct MenuScreen
 {
     const float* pWindowMatrix;
 
@@ -21,25 +21,33 @@ struct MenuScreen
 
     int numOptions;
 
+    char* title;
+
     char** optionNames;
 
-    int currentlySelectedOption;
-};
-typedef struct MenuScreen MenuScreen;
+    int charLenTitle;
+
+    int currentlySelectedOptionIndex;
+
+} MenuScreen;
 
 
 // Menu constructor #1 (heap-allocated).
-MenuScreen* initMenuScreen(const float* p_window_matrix, const int n_options, ...)
+MenuScreen* initMenuScreen(const char* title, const float* p_window_matrix, const int n_options, ...)
 {
     MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
     m->pWindowMatrix = p_window_matrix;
 
+    m->title = strBuild(title);
+
+    m->charLenTitle = (int)strlen(m->title);
+
     m->numOptions = n_options;
 
     m->optionNames = (char **)malloc(n_options * sizeof(char *));
 
-    m->currentlySelectedOption = 0;
+    m->currentlySelectedOptionIndex = 0;
 
 
     va_list optionStringsArgumentList;
@@ -59,17 +67,21 @@ MenuScreen* initMenuScreen(const float* p_window_matrix, const int n_options, ..
 }
 
 // Menu constructor #2 (heap-allocated).
-MenuScreen* initMenuScreenEmpty(float* p_window_matrix, int n_options)
+MenuScreen* initMenuScreenEmpty(const char* title, const float* p_window_matrix, int n_options)
 {
     MenuScreen* m = (MenuScreen *)malloc(sizeof(MenuScreen));
 
     m->pWindowMatrix = p_window_matrix;
-    
+
+    m->title = strBuild(title);
+
+    m->charLenTitle = (int)strlen(m->title);
+
     m->numOptions = n_options;
 
     m->optionNames = (char **)malloc(n_options * sizeof(char *));
     
-    m->currentlySelectedOption = 0;
+    m->currentlySelectedOptionIndex = 0;
 
 
     for (int i = 0; i < n_options; ++i) 
@@ -114,8 +126,8 @@ void renderMenuScreen(MenuScreen* m)
     glColor4f(.3f, .3f, .3f, 0.5f);
 
 
-    float hiBorder = 0.5f + (m->numOptions / 2 + 1) * .05f;
-    float loBorder = 0.5f - (m->numOptions / 2 + 1) * .05f;
+    float hiBorder = 0.5f + (m->numOptions / 2.0f + 1.0f) * .05f;
+    float loBorder = 0.5f - (m->numOptions / 2.0f + 1.0f) * .05f;
 
     glBegin(GL_QUADS);
     {
@@ -125,7 +137,7 @@ void renderMenuScreen(MenuScreen* m)
         glVertex3f(1.0f * m->screenWidth, 1.0f * m->screenHeight, .0f);
         glVertex3f(1.0f * m->screenWidth, 0.0f * m->screenHeight, .0f);
         glVertex3f(0.0f * m->screenWidth, 0.0f * m->screenHeight, .0f);
-        
+
         glColor4f(.1f, .1f, .1f, 1.0f);
 
         glVertex3f(0.40f * m->screenWidth, hiBorder * m->screenHeight, .1f);
@@ -137,25 +149,36 @@ void renderMenuScreen(MenuScreen* m)
 
     glTranslatef(.0f, .0f, .2f);
 
-    float offset = hiBorder - .05f;
+    glColor4ub(255, 160, 160, 255);
+
+    // Render menu's title.
+    glRasterPos2f(
+        0.5f * m->screenWidth - (m->charLenTitle + 0.5f) * 4.5f, 
+        (hiBorder - .04f) * m->screenHeight
+    );
+    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)m->title);
+
+    glColor4ub(255, 255, 255, 255);
+
+    float offset = hiBorder - .09f;
 
     for (int i = 0; i < m->numOptions; ++i)
     {
-        glColor4f(0xFF, 0xFF, 0xFF, 1.0f);
-
-        if (i == m->currentlySelectedOption) 
+        if (i == m->currentlySelectedOptionIndex)
         {
+            // Render an arrow-like character slightly to the left of the curerent option's name.
             glRasterPos2f(0.46f * m->screenWidth, offset * m->screenHeight);
             glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '>');
         }
 
+        // Render option name
         glRasterPos2f(0.48f * m->screenWidth, offset * m->screenHeight);
-
         glutBitmapString(
             GLUT_BITMAP_9_BY_15, 
             (const unsigned char*)m->optionNames[i]
         );
 
+        // Move downwards
         offset -= .05f;
     }
 
@@ -171,23 +194,23 @@ const char* menuScreenHandler(MenuScreen* m, int* option_id)
 {
     if (arrow_down_loaded)
     {
-        if (m->currentlySelectedOption < m->numOptions - 1)
-            m->currentlySelectedOption += 1;
+        if (m->currentlySelectedOptionIndex < m->numOptions - 1)
+            m->currentlySelectedOptionIndex += 1;
         arrow_down_loaded = false;
     }
 
     if (arrow_up_loaded)
     {
-        if (m->currentlySelectedOption > 0)
-            m->currentlySelectedOption -= 1;
+        if (m->currentlySelectedOptionIndex > 0)
+            m->currentlySelectedOptionIndex -= 1;
         arrow_up_loaded = false;
     }
 
     if (keystrokes['\n'] || keystrokes['\f'] || keystrokes['\r'])
     {
         if (option_id != NULL)
-            *option_id = m->currentlySelectedOption;
-        return m->optionNames[m->currentlySelectedOption];
+            *option_id = m->currentlySelectedOptionIndex;
+        return m->optionNames[m->currentlySelectedOptionIndex];
     }
 
     return NULL;
@@ -201,6 +224,7 @@ void deleteMenuScreen(MenuScreen* m)
             free(m->optionNames[i]);
     }
     free(m->optionNames);
+    free(m->title);
     free(m);
 }
 

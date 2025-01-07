@@ -26,7 +26,7 @@
 #include "StellarObject.h"
 #include "KeyboardCallback.h"
 #include "MouseWheelCallback.h"
-#include "PassiveMotionCallback.h"
+#include "MotionCallback.h"
 
 
 int window_width;
@@ -89,6 +89,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
 	glutInitWindowSize(1280, 720);
+    glutInitWindowPosition(0, 0);
 	window_id = glutCreateWindow("Solar System - exhibition");
 
     initGlobals(argc, argv); 
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
     callbackPassiveMotion(window_centre_X, window_centre_Y);
 
     glutDisplayFunc(display);
-    glutKeyboardFunc(callbackKeyboard);
+    glutKeyboardFunc(callbackKeyboardDown);
     glutKeyboardUpFunc(callbackKeyboardUp);
     glutSpecialFunc(callbackSpecialKeyboard);
     glutMouseFunc(callbackMouse);
@@ -385,23 +386,9 @@ void initGlobals(int argc, char* argv[])
     cJSON_Delete(json); 
     free(buffer);
 
-    // Auxiliary variables for centering the mouse pointer using glutWarpPointer().
-    window_centre_X = window_width / 2;
-    window_centre_Y = window_height / 2;
-
-    // Independent variables for the parametric equation of a sphere.
-    // Used for controlling the camera's orientation through mouse movement.
-    camera_angle_horizontal = .0f;
-    camera_angle_vertical = .0f;
-
-    mouse_sensitivity = .002f;
-
-    simulation_speed = 1.0f;
-
-    // Used for keyboard input (see KeyboardCallback.h)
-    for (int i = 0; i < sizeof(keystrokes) / sizeof(keystrokes[0]); ++i) {
-        keystrokes[i] = false;
-    }
+    initModuleMotionCallback(window_width, window_height);
+    initModuleKeyboardCallback();
+    initModuleMouseWheelCallback();
 
     camera = initCamera(
         // Initial camera position .
@@ -452,6 +439,7 @@ void initGlobals(int argc, char* argv[])
 
     mainMenuScreen = setMenuScreenDimensions(
         initMenuScreen(
+            "MAIN MENU",
             window_matrix,
             3,
             "Free-fly",
@@ -463,6 +451,7 @@ void initGlobals(int argc, char* argv[])
 
     planetMenuScreen = setMenuScreenDimensions(
         initMenuScreenEmpty(
+            "CELESTIAL BODIES",
             window_matrix, 
             num_stellar_objects
         ),

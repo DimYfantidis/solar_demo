@@ -2,7 +2,13 @@
 #define MOUSE_WHEEL_CALLBACK_H
 
 
-float move_speed_scale_factor = 1.0f;
+float move_speed_scale_factor;
+
+
+void initModuleMouseWheelCallback(void)
+{
+    move_speed_scale_factor = 1.0f;
+}
 
 void callbackMouseWheel(int button, int dir, int x, int y)
 {

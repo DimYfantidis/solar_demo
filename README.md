@@ -202,6 +202,11 @@ This subsection provides an extended explanation of the program's modules of imp
 
     * **Non-textured Skybox:** Generates `N` tiny spheres on the skybox's spherical surface to create the illusion of distant stars. Parameter `N` is specified by the user.
 
+    <p align="middle">
+        <img src="./media/skybox_implementation_exhibition.gif" alt="Custom Skybox Exhibition GIF" width="740">
+        <br>
+        <i> Visual explanation of the Skybox's implementation with and without texture. </i>
+    </p>
 
 <a id="camera"></a>
 
