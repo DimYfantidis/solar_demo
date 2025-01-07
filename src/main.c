@@ -322,6 +322,8 @@ void initGlobals(int argc, char* argv[])
 
     refresh_ts = getAbsoluteTimeMillis();
 
+    simulation_speed = 1.0;
+
     // open the _constants.json file 
     FILE *fp = fopen(argv[1], "r"); 
 

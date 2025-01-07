@@ -222,6 +222,12 @@ This subsection provides an extended explanation of the program's modules of imp
 
 * **`MenuScreen.h`:** Encapsulates the implementation of a menu-like environment. When the menu is open, the user can cycle between its different options and choose one of them, thus extending the program's capabilities/functionalities.
 
+    <p align="middle">
+        <img src="./media/main_menu.PNG" alt="Main Menu" height="270">
+        <img src="./media/planet_menu.PNG" alt="Planet Menu" height="270">
+        <br>
+        <i> The simulation's menus' design and options. </i>
+    </p>
 
 <a id="stellarobject"></a>
 
