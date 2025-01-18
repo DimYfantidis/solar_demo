@@ -4,7 +4,7 @@
         "height" : 1080
     },
 
-    "fullscreen" : false,
+    "fullscreen" : true,
 
     "sky_texture" : true,
 

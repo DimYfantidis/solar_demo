@@ -72,22 +72,22 @@ char* strCat(int n_strings, ...)
 
     va_start(stringsToBeConcatenatedList, n_strings);
 
-    size_t lengthOfResultString = 0;
+    size_t length_of_result_string = 0;
 
 
     for (int i = 0; i < n_strings; ++i)
     {
         const char* arg = va_arg(stringsToBeConcatenatedList, const char*);
 
-        lengthOfResultString += strlen(arg);
+        length_of_result_string += strlen(arg);
     }
 
     // Restart the VA List in order to re-iterate it.
     va_end(stringsToBeConcatenatedList);
     va_start(stringsToBeConcatenatedList, n_strings);
-    
 
-    char* result = (char *)malloc((lengthOfResultString + 1) * sizeof(char));
+
+    char* result = (char *)malloc((length_of_result_string + 1) * sizeof(char));
 
     int k = 0;
 
@@ -103,7 +103,7 @@ char* strCat(int n_strings, ...)
 
     va_end(stringsToBeConcatenatedList);
 
-    result[lengthOfResultString] = '\0';
+    result[length_of_result_string] = '\0';
 
     return result;
 }

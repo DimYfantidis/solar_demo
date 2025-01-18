@@ -80,7 +80,7 @@ This project demands the existence of a base **Python3** interpeter, **CMake ver
 
 1. Clone the repository:
     ```
-    git clone https://github.com/DimYfantidis/my_solar_system.git
+    git clone https://github.com/DimYfantidis/solar_demo.git
     ```
 
 2. Check for and install any missing Python module dependencies:

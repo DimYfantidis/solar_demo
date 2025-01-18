@@ -22,7 +22,7 @@ typedef struct Timer
     uint64_t start;
     uint64_t stop;
 
-}Timer;
+} Timer;
 
 
 uint64_t getAbsoluteTimeMillis()
