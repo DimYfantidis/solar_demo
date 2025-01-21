@@ -18,8 +18,8 @@ ENDIF ()
 
 IF (UNIX AND NOT APPLE)
     IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/freeglut/build/lib")
-    LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/cJSON/build")
+        LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/freeglut/build/lib")
+        LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/cJSON/build")
     ENDIF()
 ENDIF()
 

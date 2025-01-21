@@ -252,8 +252,6 @@ void display(void)
 
     renderStars(starsSkyBox);
 
-    printf("AAA\n");
-
     static char time_format_buffer[1024];
 
     simulation_elapsed_millis += (uint64_t)(elapsed_seconds * simulation_speed * 1000);
