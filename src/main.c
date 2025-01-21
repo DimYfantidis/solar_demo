@@ -6,6 +6,11 @@
 #   define _USE_MATH_DEFINES
 #endif 
 
+#ifndef M_PI
+#   define M_PI     3.1415926535897932
+#   define M_PI_2   1.5707963267948966
+#endif 
+
 #include <time.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -147,10 +152,8 @@ int main(int argc, char* argv[])
 }
 
 
-
-
 void display(void)
-{
+{   
     keyToggle('H', &enable_hud, 250);
     keyToggle('P', &enable_planet_menu, 250);
     keyToggle(27,  &enable_main_menu, 250);
@@ -164,7 +167,6 @@ void display(void)
         return;
     }
     refresh_ts = getAbsoluteTimeMillis();
-
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -250,6 +252,7 @@ void display(void)
 
     renderStars(starsSkyBox);
 
+    printf("AAA\n");
 
     static char time_format_buffer[1024];
 

@@ -1,39 +1,67 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1 FATAL_ERROR)
 
-project(solar_system LANGUAGES C)
+PROJECT(solar_system LANGUAGES C)
 
-include_directories(
-    ./include
-    ./dependencies/freeglut/include
-    ./dependencies/cJSON
+INCLUDE_DIRECTORIES(
+    "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}/dependencies/freeglut/include"
+    "${PROJECT_SOURCE_DIR}/dependencies/cJSON"
 )
 
 # Specify the library directories
-link_directories(./dependencies/freeglut/build/lib/Release)
-link_directories(./dependencies/cJSON/build/Release)
+IF (WIN32)
+    IF (MSVC)
+        LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/freeglut/build/lib/Release")
+        LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/cJSON/build/Release")
+    ENDIF()
+ENDIF ()
+
+IF (UNIX AND NOT APPLE)
+    IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/freeglut/build/lib")
+    LINK_DIRECTORIES("${PROJECT_SOURCE_DIR}/dependencies/cJSON/build")
+    ENDIF()
+ENDIF()
 
 # Add source files
-file(GLOB SOURCES "src/main.c")
+FILE(GLOB SOURCES "src/main.c")
 
 # Add the executable target
-add_executable(${PROJECT_NAME} ${SOURCES})
+ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 
 # Set C11 standard for this specific target
-set_target_properties(${PROJECT_NAME} PROPERTIES
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     C_STANDARD 11
     C_STANDARD_REQUIRED ON
     C_EXTENSIONS OFF
 )
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} freeglut)
-target_link_libraries(${PROJECT_NAME} cjson)
+IF (WIN32)
+    IF (MSVC)
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME} freeglut)
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME} cjson)
 
-# Post-build step to copy the DLL
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dependencies/freeglut/build/bin/Release/freeglut.dll"
-    "${CMAKE_SOURCE_DIR}/dependencies/cJSON/build/Release/cjson.dll"
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-)
+        # Post-build step to copy the DLL
+        ADD_CUSTOM_COMMAND(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/dependencies/freeglut/build/bin/Release/freeglut.dll"
+            "${CMAKE_SOURCE_DIR}/dependencies/cJSON/build/Release/cjson.dll"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        )
+    ENDIF ()
+ENDIF()
+
+
+IF (UNIX AND NOT APPLE)
+    IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+            -lm
+            -lGL
+            -lGLU
+            -lglut
+            -lcjson
+        )
+    ENDIF()
+ENDIF()

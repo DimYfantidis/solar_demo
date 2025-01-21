@@ -64,22 +64,22 @@ def onerror_handler(func, path: str, exc_info):
         raise Exception(exc_info)
 
 
-def execute_binaries_msvc(sln_dir_abs: str, sln_name: str) -> bool:
+def build_library_msvc(sln_dir_abs: str, sln_name: str) -> bool:
 
-    if os.path.exists(f"./build/Release/{sln_name}.dll"):
-        print(f"Warning: Dependency \"{sln_name}\" has already been built; `--build-depend` is ignored.")
+    if os.path.exists("./build/Release/%s.dll" % (sln_name)):
+        print("Warning: Dependency \"%s\" has already been built; `--build-depend` is ignored." % (sln_name))
         return True
 
     # Build FreeGLUT from source using the generated solution and MSVC
-    command = "cmd.exe /c vcvarsall.bat x64 && "
-    command += f"cd {sln_dir_abs} && "
-    command += f"msbuild {sln_name}.sln /p:Configuration=Release /p:Platform=x64 /t:{sln_name}"
+    command = ["cmd.exe", "/c", "vcvarsall.bat", "x64", "&&"]
+    command += ["cd", sln_dir_abs, "&&"]
+    command += ["msbuild", "%s.sln" % (sln_name), "/p:Configuration=Release", "/p:Platform=x64", "/t:%s" % (sln_name)]
 
     # MSVC's environment variables must be loaded before build process 
-    msvc_dir = f"C:\\Program Files\\Microsoft Visual Studio\\"
+    msvc_dir = "C:\\Program Files\\Microsoft Visual Studio\\"
     msvc_ver = os.listdir(msvc_dir)
     msvc_ver.sort()
-    msvc_dir += f"{msvc_ver[-1]}\\Community\\VC\\Auxiliary\\Build"
+    msvc_dir += "%s\\Community\\VC\\Auxiliary\\Build" % (msvc_ver[-1])
 
     # Run vcvarsall.bat and capture the environment variables
     try:
@@ -95,6 +95,10 @@ def execute_binaries_msvc(sln_dir_abs: str, sln_name: str) -> bool:
     return True
 
 
+def build_library_make(sln_dir_abs: str, sln_name: str) -> bool:
+    pass
+
+
 def setup_dependency(
     dep_name: str, 
     dep_repo_url: str, 
@@ -102,15 +106,28 @@ def setup_dependency(
 ) -> bool:
 
     try:
-        # Download dependency from its remote repository
-        subprocess.run(f"git clone {dep_repo_url}", cwd="./dependencies", check=True)
-        subprocess.run(f"git checkout {version_hex_checkout}", cwd=f"./dependencies/{dep_name}", check=True)
+        # Download dependency from its remote repository.
+        subprocess.run(
+            args=["git", "clone", dep_repo_url], 
+            cwd="./dependencies", 
+            check=True
+        )
+        # Switch to specific repo version to avoid compatibility issues.
+        subprocess.run(
+            args=["git", "checkout", version_hex_checkout], 
+            cwd="./dependencies/%s" % (dep_name), 
+            check=True
+        )
 
-        # Create build directory for CMake's output files
-        os.mkdir(f"./dependencies/{dep_name}/build")
+        # Create build directory for CMake's output files.
+        os.mkdir("./dependencies/%s/build" % (dep_name))
 
         # Build dependency from source
-        subprocess.run(f"cmake ..", cwd=f"./dependencies/{dep_name}/build", check=True)
+        subprocess.run(
+            args=["cmake", ".."], 
+            cwd="./dependencies/%s/build" % (dep_name), 
+            check=True
+        )
 
     except subprocess.CalledProcessError as e:
         print(e)
@@ -123,10 +140,10 @@ if __name__ == '__main__':
     
     if "-help" in argv:
         print(HELP_MESSAGE)
-        exit(0)
-
+        exit()
+ 
     if "-clear" in argv or "-cleanse" in argv:
-        
+
         # Clears the project's cache
         if os.path.exists("./dependencies"):
             shutil.rmtree("./dependencies", onerror=onerror_handler)
@@ -139,50 +156,74 @@ if __name__ == '__main__':
             
         if os.path.exists("./data"):
             
-            astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir(f"./data/{x}")]
+            astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir("./data/%s" % (x))]
             
             for astro_dir in astro_system_dirs:
                 
-                bitmapTextureFiles = [x for x in os.listdir(f"./data/{astro_dir}") if x.endswith(".bmp")]
+                bitmapTextureFiles = [x for x in os.listdir("./data/%s" % (astro_dir)) if x.endswith(".bmp")]
                 
                 for stellarObjectBitamp in bitmapTextureFiles:
-                    os.remove(f"./data/{astro_dir}/{stellarObjectBitamp}")
+                    os.remove("./data/%s/%s" % (astro_dir, stellarObjectBitamp))
 
         # Exit gracefully
         exit()
 
+
+    def remove_suffix(input_string: str, suffix: str) -> str:
+        if suffix and input_string.endswith(suffix):
+            return input_string[:-len(suffix)]
+        return input_string
+
+
+    def remove_prefix(input_string: str, prefix: str) -> str:
+        if prefix and input_string.startswith(prefix):
+            return input_string[len(prefix):]
+        return input_string
+
     
-    astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir(f"./data/{x}")]
+    astro_system_dirs = [x for x in os.listdir("./data") if os.path.isdir("./data/%s" % (x))]
     
     for astro_dir in astro_system_dirs:
         
-        jpegTextureFiles = [x for x in os.listdir(f"./data/{astro_dir}") if x.endswith(".jpg")]
+        jpegTextureFiles = [x for x in os.listdir("./data/%s" % (astro_dir)) if x.endswith(".jpg")]
         
         for stellarObjectJpeg in jpegTextureFiles:
-            
-            obj_name = stellarObjectJpeg.removesuffix('.jpg')
-            input_path = f"./data/{astro_dir}/{obj_name}.jpg"
-            output_path = f"./data/{astro_dir}/{obj_name}.bmp"
+
+            obj_name = remove_suffix(stellarObjectJpeg, '.jpg')
+            input_path = "./data/%s/%s.jpg" % (astro_dir, obj_name)
+            output_path = "./data/%s/%s.bmp" % (astro_dir, obj_name)
             
             if os.path.exists(output_path):
                 # Texture has already been converted from JPEG to BMP.
                 continue
             
             try:
-                print(f"Converting {obj_name}'s texture from JPEG to Bitmap...")
+                print("Converting %s's texture from JPEG to Bitmap..." % (obj_name))
                 
                 with Image.open(input_path) as img:
                     img.save(output_path, format="BMP")
                     
             except Exception as e:
-                print(f"An error occurred while converting {stellarObjectJpeg} to bitmap: {e}")
+                print("An error occurred while converting %s to bitmap: %s" % (stellarObjectJpeg, str(e)))
 
     
     if not os.path.exists("./dependencies"):
         os.mkdir("./dependencies")
     
     if not os.path.exists("./dependencies/freeglut"):
-        
+
+        # Additional dependencies for Deviant-based Linux distros:
+        #   sudo apt-get install -y libx11-dev libxi-dev libxkbcommon-dev libgl1-mesa-dev libegl1-mesa-dev libxrandr-dev libxext-dev
+
+        # Installing CMake 3.23.5 for Linux:
+        #   wget https://github.com/Kitware/CMake/releases/download/v3.23.5/cmake-3.23.5-linux-x86_64.tar.gz
+        #   tar -xzvf cmake-3.23.5-linux-x86_64.tar.gz
+        #   sudo mv cmake-3.23.5-linux-x86_64 /opt/cmake-3.23.5
+        #   sudo ln -sf /opt/cmake-3.23.5/bin/* /usr/local/bin/
+
+        # Verify the Installation
+        #   cmake --version
+
         # Download FreeGLUT from its remote repository
         if not setup_dependency(
             "freeglut", 
@@ -192,11 +233,11 @@ if __name__ == '__main__':
             print("Error when cloning FreeGLUT from source repository.")
             exit(1)
 
-    if not os.path.exists("./dependencies/cjson"):
+    if not os.path.exists("./dependencies/cJSON"):
         
         # Download cJSON from its remote repository
         if not setup_dependency(
-            "cjson", 
+            "cJSON", 
             "https://github.com/DaveGamble/cJSON.git",
             "12c4bf1986c288950a3d06da757109a6aa1ece38"
         ):
@@ -206,7 +247,7 @@ if __name__ == '__main__':
 
     system_platform = pl_system()
 
-    print(f"Operating System family: {system_platform}")
+    print("Operating System family: %s" % (system_platform))
 
     if system_platform == "Windows":
 
@@ -214,16 +255,16 @@ if __name__ == '__main__':
         if "-build-depend" in argv:
 
             # Compile FreeGLUT library from source
-            if not execute_binaries_msvc(
-                sln_dir_abs=f"{os.getcwd()}\\dependencies\\freeglut\\build", 
+            if not build_library_msvc(
+                sln_dir_abs="%s\\dependencies\\freeglut\\build" % (os.getcwd()), 
                 sln_name="freeglut"
             ):
                 print("Compilation of the FreeGLUT library was unsuccessful.\n")
                 exit(1)
 
             # Compile cJSON library from source
-            if not execute_binaries_msvc(
-                sln_dir_abs=f"{os.getcwd()}\\dependencies\\cjson\\build", 
+            if not build_library_msvc(
+                sln_dir_abs="%s\\dependencies\\cJSON\\build" % (os.getcwd()), 
                 sln_name="cjson"
             ):
                 print("Compilation of the cJSON library was unsuccessful.\n")
@@ -235,10 +276,14 @@ if __name__ == '__main__':
             if not os.path.exists("./build"):
                 os.mkdir("./build")
 
-            subprocess.run("cmake ..", cwd="./build", check=True)
+            subprocess.run(
+                args=["cmake", ".."], 
+                cwd="./build", 
+                check=True
+            )
 
-            if not execute_binaries_msvc(
-                sln_dir_abs=f"{os.getcwd()}\\build", 
+            if not build_library_msvc(
+                sln_dir_abs="%s\\build" % (os.getcwd()), 
                 sln_name="solar_system"
             ):
                 exit(1)
@@ -246,25 +291,75 @@ if __name__ == '__main__':
         if "-run" in argv:
             
             # Load the program's user preferences.
-            constants = f"{os.getcwd()}\\data\\constants.json"
+            constants = "%s\\data\\constants.json" % (os.getcwd())
 
             astro_system_dir = [x for x in argv if x.startswith("/planets:")]
-            astro_system_dir = astro_system_dir[0].removeprefix('/planets:')
-            astro_system_dir = f"{os.getcwd()}\\data\\{astro_system_dir}\\"
+            astro_system_dir = remove_prefix(astro_system_dir[0], '/planets:')
+            astro_system_dir = "%s\\data\\%s\\" % (os.getcwd(), astro_system_dir)
 
             subprocess.run(
-                f".\\build\\Release\\solar_system.exe {constants} {astro_system_dir}", 
+                args=[".\\build\\Release\\solar_system.exe", constants, astro_system_dir], 
                 check=True
             )
 
     elif system_platform == "Linux":
+        
         # Linux Distro
-        pass
+        if "-build-depend" in argv:
+
+            freeglut_bin_path = "./dependencies/freeglut/build/bin"
+
+            if not os.path.exists(freeglut_bin_path) or not os.listdir(freeglut_bin_path):
+                subprocess.run(
+                    args=["make"],
+                    cwd="./dependencies/freeglut/build",
+                    check=True
+                )
+
+            subprocess.run(
+                args=["make"],
+                cwd="./dependencies/cJSON/build",
+                check=True
+            )
+
+        if "-build-proj" in argv:
+
+            if not os.path.exists("./build"):
+                os.mkdir("./build")
+
+            subprocess.run(
+                args=["cmake", ".."],
+                cwd="./build",
+                check=True
+            )
+
+            subprocess.run(
+                args=["make"],
+                cwd="./build",
+                check=True
+            )
+
+        if "-run" in argv:
+            
+            # Load the program's user preferences.
+            constants = "%s/data/constants.json" % (os.getcwd())
+
+            astro_system_dir = [x for x in argv if x.startswith("/planets:")]
+            astro_system_dir = remove_prefix(astro_system_dir[0], '/planets:')
+            astro_system_dir = "%s/data/%s/" % (os.getcwd(), astro_system_dir)
+
+            subprocess.run(
+                args=["./build/solar_system", constants, astro_system_dir], 
+                check=True
+            )
+
     elif system_platform == "Darwin":
         # MacOS
         pass
+
     elif system_platform == "Java":
         # ???
         pass
+
     else:
-        raise Exception(f"Unrecognised System Platform: {system_platform}")
+        raise Exception("Unrecognised System Platform: %s" % (system_platform))

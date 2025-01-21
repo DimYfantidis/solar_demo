@@ -177,7 +177,7 @@ void updateCamera(Camera* camera)
     );
 }
 
-inline void deleteCamera(Camera* camera)
+void deleteCamera(Camera* camera)
 {
     if (camera != NULL)
         free(camera);
